@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hamdard University Chatbot</title>
+  <!-- <link rel="stylesheet" href="style.css"> -->
+
+  <!-- Bootstrap CSS for chatbot -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+
+  <!-- Bootstrap for main pages -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="media.css">
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- <style>
+      /* Chatbot Icon Styles */
+      .chatbot-icon {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background-color: #4caf50;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .chatbot-container {
+        display: none;
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        width: 350px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        z-index: 1000;
+      }
+
+      .chatbot-header {
+        background-color: #008cba;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+      }
+
+      .chatbot-body {
+        padding: 15px;
+        height: 300px;
+        overflow-y: auto;
+        background-color: #f9f9f9;
+      }
+
+      .chatbot-input-container {
+        display: flex;
+        padding: 10px;
+        background-color: #f1f1f1;
+        border-top: 1px solid #ccc;
+      }
+
+      .chatbot-input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-right: 5px;
+      }
+
+      .send-button {
+        background-color: #008cba;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .send-button:hover {
+        background-color: #005f7f;
+      }
+
+      .user-message {
+        background-color: #f4f4f4;
+        text-align: right;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+
+      .bot-message {
+        background-color: #008cba;
+        color: white;
+        text-align: left;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+    </style> -->
+</head>
+
+<body>
+
+  <!-- header -->
+  <section class="top-navbar">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="row">
+          <nav class="top-navbar navbar-expand-lg  w-100">
+            <!-- <div class="container-fluid"> -->
+            <ul class="top-navbar-nav gap-3">
+              <li class="nav-item ">
+                <a class="nav-link " href="#">Blog</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link" href="#">Portal</a>
+
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Webmail</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">ORIC</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Center of Excellence</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">International Office</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Journals</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Library</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">FAQs</a>
+              </li>
+              <a href="https://admission.hamdard.edu.pk/" class="apply-now">Apply Now</a>
+              <div class="social-media-icons">
+                <i class="fa-brands fa-facebook-f"></i>
+                <i class="fa-brands fa-instagram"></i>
+                <i class="fa-brands fa-linkedin-in"></i>
+                <i class="fa-brands fa-twitter"></i>
+              </div>
+              <a href="#" class="apply-now">Faculty Login</a>
+
+            </ul>
+        </div>
+        </nav>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- main navbar -->
+  <section class="main-navbar">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="row ">
+          <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+              <img src="assets/Hamdard logo.png" class="img-fluid" alt="">
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse main-nav  " id="navbarNav">
+                <ul class="navbar-nav ">
+                  <li class="nav-item dropdown border-start">
+                    <a class="nav-link" href="#" role="button"><i class="fa-solid fa-house-chimney"></i> About HU
+                      <br><span>All Variations</span></a>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">The Founder</a></li>
+                      <li><a class="dropdown-item" href="#">The Chancelor</a></li>
+                      <li><a class="dropdown-item" href="#">The Vice Chancelor</a></li>
+                      <li><a class="dropdown-item" href="#">Vission & Mission</a></li>
+                      <li><a class="dropdown-item" href="#">Board Of Govelrnance</a></li>
+                    </ul>
+                  </li>
+
+                  <li class="nav-item dropdown border-start">
+                    <a class="nav-link" href="#" role="button"><i class="fa-solid fa-file"></i> Admissions<br>
+                      <span>Get Enroll Now</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">How To Apply</a></li>
+                      <li class="dropdown-submenu">
+                        <a class="dropdown-item" href="#">Programs Offered</a>
+                        <ul class="submenu">
+                          <li><a class="dropdown-item" href="#">Law</a></li>
+                          <li><a class="dropdown-item" href="#">Pharmacy</a></li>
+                          <li><a class="dropdown-item" href="#">Eastern Medicine</a></li>
+                          <li><a class="dropdown-item" href="#">Management Sciences</a></li>
+                          <li><a class="dropdown-item" href="#">Health & Medical Sciences</a></li>
+                          <li><a class="dropdown-item" href="#">Social Sciences & Humanities</a></li>
+                          <li><a class="dropdown-item" href="#">Engineering Science & Technology</a></li>
+                        </ul>
+                      </li>
+                      <li><a class="dropdown-item" href="#">Fee Structure</a></li>
+                      <li><a class="dropdown-item" href="#">Fee Refund Policy</a></li>
+                      <li><a class="dropdown-item" href="#">Financial Assistance</a></li>
+                      <li><a class="dropdown-item" href="#">Ihsan Trust Application Form</a></li>
+                      <li><a class="dropdown-item" href="#">Downloads</a></li>
+                    </ul>
+                  </li>
+
+
+
+                  <li class="nav-item dropdown border-start">
+                    <a class="nav-link" href="#"><i class="fa-solid fa-building-columns"></i> Campus<br><span>Our
+                        Campusses</span></a>
+                    <ul class="dropdown-menu">
+                      <li class="city-dropdown-submenu">
+                        <a class="dropdown-item" href="#">City Campus</a>
+                        <ul class="city-submenu">
+                          <li><a class="dropdown-item" href="#">Programs Offered</a></li>
+                          <li><a class="dropdown-item" href="#">Fee Structure</a></li>
+                        </ul>
+                      </li>
+                      <li class="b-dropdown-submenu">
+                        <a class="dropdown-item" href="#">Bahadurabad Campus</a>
+                        <ul class="b-submenu">
+                          <li><a class="dropdown-item" href="#">Programs Offered</a></li>
+                        </ul>
+                      </li>
+                      <li class="kda-dropdown-submenu">
+                        <a class="dropdown-item" href="#">KDA Campus</a>
+                        <ul class="kda-submenu">
+                          <li><a class="dropdown-item" href="#">Programs Offered</a></li>
+                        </ul>
+                      </li>
+                      <li class="nn-dropdown-submenu">
+                        <a class="dropdown-item" href="#">NN Campus</a>
+                        <ul class="nn-submenu">
+                          <li><a class="dropdown-item justify-content-start" href="#">Programs Offered</a></li>
+                        </ul>
+                      </li>
+                      <li><a class="dropdown-item" href="#">Islamabad Campus</a></li>
+                      <li class="hu-dropdown-submenu">
+                        <a class="dropdown-item" href="#">HU Hospitals</a>
+                        <ul class="hu-submenu">
+                          <li><a class="dropdown-item" href="#">Naimat Begum Hospital</a></li>
+                          <li><a class="dropdown-item" href="#">Shifa ul Mulk Hospital</a></li>
+                          <li><a class="dropdown-item" href="#">Taj Complex</a></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+
+
+
+                  <li class="nav-item dropdown border-start">
+                    <a class="nav-link" href="#"><i class="fa-solid fa-graduation-cap"></i> Faculties<br><span>Reasearch
+                        & Study</span></a>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Law</a></li>
+                      <li><a class="dropdown-item" href="#">Pharmacy</a></li>
+                      <li><a class="dropdown-item" href="#">Eastern Medicine</a></li>
+                      <li><a class="dropdown-item" href="#">Management Sciences</a></li>
+                      <li><a class="dropdown-item" href="#">Health & Medical Sciences</a></li>
+                      <li><a class="dropdown-item" href="#">Social Sciences & Humanities</a></li>
+                      <li><a class="dropdown-item" href="#">Engineering Science & Technology</a></li>
+                    </ul>
+                  </li>
+                  <li class="nav-item dropdown border-start">
+                    <a class="nav-link" href="#">Life at HU<br><span>Our Events</span></a>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Events</a></li>
+                      <li><a class="dropdown-item" href="#">Campus Tour</a></li>
+                      <li><a class="dropdown-item" href="#">Hostel Life</a></li>
+                      <li><a class="dropdown-item" href="#">Fest Video</a></li>
+                      <li><a class="dropdown-item" href="#">Library</a></li>
+                    </ul>
+                  </li>
+                  <li class="nav-item border-start">
+                    <a class="nav-link" href="#">Contact<br><span>Get In Touch</span></a>
+                  </li>
+
+                </ul>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- hero -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Chatbot Icon -->
+  <div class="chatbot-icon" id="chatbotIcon">
+    <i class="fa fa-comment"></i>
+  </div>
+
+  <!-- Chatbot Container -->
+  <div class="chatbot-container" id="chatbotContainer">
+    <div class="chatbot-header">Hamdard University Chatbot</div>
+    <div class="chatbot-body" id="chatbotBody"></div>
+    <div class="chatbot-input-container">
+      <input type="text" id="userInput" class="chatbot-input" placeholder="Ask me about Hamdard University..." />
+      <button class="send-button" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- <script>
+      const chatbotIcon = document.getElementById("chatbotIcon");
+      const chatbotContainer = document.getElementById("chatbotContainer");
+
+      // Toggle chatbot visibility
+      chatbotIcon.addEventListener("click", () => {
+        chatbotContainer.style.display =
+          chatbotContainer.style.display === "none" ||
+          chatbotContainer.style.display === ""
+            ? "block"
+            : "none";
+      });
+
+      // Append messages
+      function appendMessage(sender, message) {
+        const chatbotBody = document.getElementById("chatbotBody");
+        const messageDiv = document.createElement("div");
+        messageDiv.className =
+          sender === "user" ? "user-message" : "bot-message";
+        messageDiv.textContent = message;
+        chatbotBody.appendChild(messageDiv);
+        chatbotBody.scrollTop = chatbotBody.scrollHeight;
+      }
+
+      // TF-IDF and Cosine Similarity implementation
+      function tfidf(text) {
+        const terms = text.toLowerCase().split(/\s+/);
+        const termFreq = {};
+        terms.forEach((term) => {
+          termFreq[term] = (termFreq[term] || 0) + 1;
+        });
+        return termFreq;
+      }
+
+      function cosineSimilarity(vec1, vec2) {
+        const allTerms = new Set([...Object.keys(vec1), ...Object.keys(vec2)]);
+        let dotProduct = 0;
+        let magnitude1 = 0;
+        let magnitude2 = 0;
+
+        allTerms.forEach((term) => {
+          const val1 = vec1[term] || 0;
+          const val2 = vec2[term] || 0;
+          dotProduct += val1 * val2;
+          magnitude1 += val1 * val1;
+          magnitude2 += val2 * val2;
+        });
+
+        return dotProduct / (Math.sqrt(magnitude1) * Math.sqrt(magnitude2));
+      }
+
+      // Predefined knowledge base
+      const knowledgeBase = [
+        {
+          question: "Where is Hamdard University?",
+          answer: "Hamdard University is located in Karachi, Pakistan.",
+        },
+        {
+          question: "What is the location of Hamdard University?",
+          answer: "Hamdard University is located in Karachi, Pakistan.",
+        },
+        {
+          question: "Can you tell me where Hamdard University is?",
+          answer: "Hamdard University is located in Karachi, Pakistan.",
+        },
+        {
+          question: "What programs does Hamdard University offer?",
+          answer:
+            "Hamdard University offers undergraduate, graduate, and doctoral programs in various disciplines such as computer science, business administration, engineering, health sciences, and more.",
+        },
+        {
+          question: "How do I apply for admission to Hamdard University?",
+          answer:
+            "Admissions can be done online through the university's official website or by visiting the admissions office. Detailed instructions are provided on the website, including application deadlines and requirements.",
+        },
+        {
+          question:
+            "What are the eligibility criteria for undergraduate programs?",
+          answer:
+            "Students must have completed their Higher Secondary School Certificate (HSSC) or equivalent with a minimum percentage as specified by the program requirements.",
+        },
+        {
+          question: "What is the fee structure for Hamdard University?",
+          answer:
+            "The fee structure varies by program. It is available on the university’s admissions page or can be obtained directly from the admissions office.",
+        },
+        {
+          question:
+            "Are there any scholarships available at Hamdard University?",
+          answer:
+            "Yes, Hamdard University offers merit-based scholarships, financial aid, and other assistance programs. Students can check the scholarship page on the website for more details.",
+        },
+        {
+          question: "How do I contact the university for further inquiries?",
+          answer:
+            "You can contact the university through the contact details available on the university’s website or visit the campus during office hours.",
+        },
+        {
+          question: "What programs are offered by the Department of Computing?",
+          answer:
+            "The Department of Computing offers programs in Computer Science, Software Engineering, Artificial Intelligence, and related fields at both undergraduate and graduate levels.",
+        },
+        {
+          question:
+            "What is the admission process for the Department of Computing?",
+          answer:
+            "Students must follow the general admission process outlined by the university, including submission of required documents and meeting the specific eligibility criteria for the computing programs.",
+        },
+        {
+          question:
+            "What career opportunities are available after completing a degree from the Department of Computing?",
+          answer:
+            "Graduates of the Department of Computing have opportunities in software development, data science, AI research, cybersecurity, IT consulting, and many more fields in the tech industry.",
+        },
+        {
+          question:
+            "Are there any industry collaborations or internships available?",
+          answer:
+            "The department often collaborates with industry leaders to provide internships, workshops, and career placement services for students.",
+        },
+        {
+          question:
+            "What are the research areas in the Department of Computing?",
+          answer:
+            "The department focuses on a variety of research areas including AI, machine learning, data science, software engineering, and computer networks.",
+        },
+
+        {
+          question: "What programs does Hamdard University offer?",
+          answer:
+            "Hamdard University offers undergraduate, graduate, and doctoral programs in various disciplines such as computer science, business administration, engineering, health sciences, and more.",
+        },
+        {
+          question: "How do I apply for admission to Hamdard University?",
+          answer:
+            "Admissions can be done online through the university's official website or by visiting the admissions office. Detailed instructions are provided on the website, including application deadlines and requirements.",
+        },
+        {
+          question:
+            "What are the eligibility criteria for undergraduate programs?",
+          answer:
+            "Students must have completed their Higher Secondary School Certificate (HSSC) or equivalent with a minimum percentage as specified by the program requirements.",
+        },
+        {
+          question: "What is the fee structure for Hamdard University?",
+          answer:
+            "The fee structure varies by program. It is available on the university’s admissions page or can be obtained directly from the admissions office.",
+        },
+        {
+          question:
+            "Are there any scholarships available at Hamdard University?",
+          answer:
+            "Yes, Hamdard University offers merit-based scholarships, financial aid, and other assistance programs. Students can check the scholarship page on the website for more details.",
+        },
+        {
+          question: "How do I contact the university for further inquiries?",
+          answer:
+            "You can contact the university through the contact details available on the university’s website or visit the campus during office hours.",
+        },
+        {
+          question: "What programs are offered by the Department of Computing?",
+          answer:
+            "The Department of Computing offers programs in Computer Science, Software Engineering, Artificial Intelligence, and related fields at both undergraduate and graduate levels.",
+        },
+        {
+          question:
+            "What is the admission process for the Department of Computing?",
+          answer:
+            "Students must follow the general admission process outlined by the university, including submission of required documents and meeting the specific eligibility criteria for the computing programs.",
+        },
+        {
+          question:
+            "What career opportunities are available after completing a degree from the Department of Computing?",
+          answer:
+            "Graduates of the Department of Computing have opportunities in software development, data science, AI research, cybersecurity, IT consulting, and many more fields in the tech industry.",
+        },
+        {
+          question:
+            "Are there any industry collaborations or internships available?",
+          answer:
+            "The department often collaborates with industry leaders to provide internships, workshops, and career placement services for students.",
+        },
+        {
+          question:
+            "What are the research areas in the Department of Computing?",
+          answer:
+            "The department focuses on a variety of research areas including AI, machine learning, data science, software engineering, and computer networks.",
+        },
+
+        {
+          question:
+            "Is there any student club or society related to computing?",
+          answer:
+            "The department may have student-led clubs such as the Computer Science Society, offering students opportunities to participate in coding challenges, hackathons, and other technical events.",
+        },
+        {
+          question: "How can I get in touch with my academic advisor?",
+          answer:
+            "You can contact your academic advisor through the department’s faculty page or by visiting the department office during office hours.",
+        },
+        {
+          question:
+            "Are there any specific requirements or prerequisites for advanced courses?",
+          answer:
+            "Advanced courses may have specific prerequisites, such as prior completion of foundational courses in programming, mathematics, or related subjects. Check the course catalog for more details.",
+        },
+        {
+          question: "How can I apply to Hamdard University?",
+          answer:
+            "You can apply online through the Hamdard University admissions portal. All details regarding application procedures, deadlines, and requirements are listed on the official website.",
+        },
+        {
+          question: "What programs does Hamdard University offer?",
+          answer:
+            "Hamdard University offers undergraduate, graduate, and doctoral programs in various fields, including health sciences, business, social sciences, engineering, and computer science.",
+        },
+        {
+          question: "What are the admission requirements?",
+          answer:
+            "Admission requirements depend on the program. Generally, they include academic transcripts, a valid entrance test score (if required), and a completed application form.",
+        },
+        {
+          question: "Is financial aid available?",
+          answer:
+            "Yes, Hamdard University offers scholarships, financial assistance, and student loans to eligible students. Details can be found on the admissions page.",
+        },
+        {
+          question: "What is the university’s fee structure?",
+          answer:
+            "The fee structure varies by program. The latest fee details can be found on the official website under the fee section.",
+        },
+        {
+          question: "What are the hostel facilities like?",
+          answer:
+            "Hamdard University provides hostel accommodation for both male and female students with all basic amenities.",
+        },
+        {
+          question: "What extracurricular activities are available?",
+          answer:
+            "The university encourages students to participate in various extracurricular activities, including sports, cultural events, and societies.",
+        },
+        {
+          question: "What programs are offered by the Department of Computing?",
+          answer:
+            "The Department of Computing offers programs in Computer Science, Software Engineering, and Artificial Intelligence at undergraduate and graduate levels.",
+        },
+
+        {
+          question:
+            "What is the admission process for the Department of Computing?",
+          answer:
+            "The admission process is the same as for other departments. Applicants must meet the academic eligibility criteria, which are program-specific, and pass the entrance test if required.",
+        },
+        {
+          question: "Is there a specific entrance exam for Computing programs?",
+          answer:
+            "Yes, depending on the program, there may be an entrance exam or interview.",
+        },
+        {
+          question: "Are there any industry collaborations or internships?",
+          answer:
+            "Yes, the Department of Computing has partnerships with various IT companies, and students are encouraged to take internships to gain hands-on experience in the field.",
+        },
+        {
+          question: "What career support is available for Computing students?",
+          answer:
+            "The department provides career counseling, job placement assistance, and helps students connect with industry professionals.",
+        },
+        {
+          question: "Can I get a PhD in Computing from Hamdard University?",
+          answer:
+            "Yes, Hamdard University offers doctoral programs in computing-related fields, depending on the research interests of faculty members.",
+        },
+        {
+          question:
+            "What labs and facilities are available for Computing students?",
+          answer:
+            "The Department of Computing is equipped with state-of-the-art computer labs, research facilities, and access to various software and tools used in the industry.",
+        },
+        {
+          question: "What is the curriculum structure?",
+          answer:
+            "The curriculum is designed to provide both theoretical knowledge and practical skills, focusing on the latest advancements in computing technologies, programming languages, algorithms, AI, and more.",
+        },
+        {
+          question: "How can I contact the Department of Computing?",
+          answer:
+            "You can contact the department via the official Hamdard University website or directly through the Department’s contact details listed on the page.",
+        },
+        {
+          question: "How can I apply for admission at Hamdard University?",
+          answer:
+            "You can apply online through the university’s official website or by visiting the admissions office. The application form will require personal details, academic history, and the required documents.",
+        },
+        {
+          question: "What is the eligibility criteria for different programs?",
+          answer:
+            "Eligibility criteria vary by program. Generally, for undergraduate programs, students need to have completed their intermediate (FSc or equivalent) with a minimum percentage (usually 50-60%). For graduate programs, a relevant undergraduate degree is required with a minimum CGPA or percentage.",
+        },
+        {
+          question: "What is the admission deadline for the upcoming semester?",
+          answer:
+            "Admission deadlines are usually announced on the university website or through advertisement in local newspapers. You should check the university’s admissions page for the most current dates.",
+        },
+        {
+          question: "How can I check the status of my application?",
+          answer:
+            "You can check the status of your application by logging into the online admissions portal with your credentials or by contacting the admissions office directly.",
+        },
+        {
+          question:
+            "What are the tuition fees for undergraduate and graduate programs?",
+          answer:
+            "Tuition fees vary by program. Undergraduate fees generally range from PKR 30,000 to PKR 60,000 per semester, while graduate programs can be higher. Check the official website for the specific fee structure for your program of interest.",
+        },
+        {
+          question:
+            "Does Hamdard University offer financial aid or scholarships?",
+          answer:
+            "Yes, Hamdard University offers financial aid and scholarships based on merit and need. You can apply for scholarships at the time of admission or during your studies. Details are available on the university's financial aid page.",
+        },
+        {
+          question: "What is the process for hostel accommodation?",
+          answer:
+            "Hostel accommodation is available on a first-come, first-served basis. To apply for a hostel, you need to fill out a hostel application form and submit it to the student affairs office. You may also need to pay an advance fee for accommodation.",
+        },
+        {
+          question:
+            "Are there part-time job opportunities available for students?",
+          answer:
+            "Hamdard University offers part-time job opportunities in various departments such as library, administration, and research. You can inquire at the student affairs office for available opportunities.",
+        },
+        {
+          question:
+            "What facilities are available on campus (e.g., library, sports, cafeteria)?",
+          answer:
+            "The university campus has a modern library, computer labs, sports facilities, a cafeteria, and Wi-Fi access. You can find more information about specific facilities on the campus tour or on the university’s website.",
+        },
+        {
+          question: "How can I get in touch with faculty or department heads?",
+          answer:
+            "Faculty contact details are usually available on the respective department’s webpage on the university’s website. You can also email or call the department’s office for assistance.",
+        },
+        {
+          question:
+            "What is the process to request transcripts or certificates?",
+          answer:
+            "To request transcripts or certificates, you need to fill out a request form available on the student portal or at the registrar's office. There may be a processing fee, and transcripts can be sent directly to other institutions upon request.",
+        },
+        {
+          question: "Where can I find the academic calendar?",
+          answer:
+            "The academic calendar is typically available on the university’s website under the 'Academic' or 'Student Affairs' section. It provides important dates such as semester start/end dates, holidays, and exam schedules.",
+        },
+        {
+          question: "What is the application process?",
+          answer:
+            "After submitting the application, you’ll receive an email and text notification. The application processing fee is Rs. 1500, except for the Faculty of Engineering Science and Technology. Payments can be made through UBL branches after printing the payment voucher.",
+        },
+        {
+          question: "What is the process for the aptitude test?",
+          answer:
+            "If you have high SAT or GMAT scores, you may be exempt from the Hamdard University entrance exam, but an interview is still required.",
+        },
+        {
+          question:
+            "Are scholarships and financial aid available for all programs?",
+          answer:
+            "Hamdard offers merit-based scholarships and financial assistance, except for subsidized programs.",
+        },
+        {
+          question: "Where are Hamdard University's campuses located?",
+          answer:
+            "Besides the main campus, Hamdard has several campuses in Karachi and Islamabad.",
+        },
+        // Add more variations of questions and answers
+      ];
+
+      // Get best match for the user's query
+      function getBestMatch(userQuery) {
+        const userQueryVector = tfidf(userQuery); // TF vector for the user's query
+        let bestMatch = null;
+        let highestSimilarity = 0;
+
+        knowledgeBase.forEach((item) => {
+          const questionVector = tfidf(item.question); // TF vector for the knowledge base question
+          const similarity = cosineSimilarity(userQueryVector, questionVector);
+
+          if (similarity > highestSimilarity) {
+            highestSimilarity = similarity;
+            bestMatch = item;
+          }
+        });
+
+        // Return the best match's answer or a default response if no match is found
+        return bestMatch
+          ? bestMatch.answer
+          : "I'm sorry, I couldn't find an answer to your question. Could you please rephrase it?";
+      }
+
+      // Send message to chatbot
+      async function sendMessage() {
+        const userInput = document.getElementById("userInput");
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        appendMessage("user", message);
+        userInput.value = "";
+
+        const response = getBestMatch(message);
+        appendMessage("bot", response);
+      }
+
+      // Close chatbot if clicking outside of it
+      document.addEventListener("click", (event) => {
+        const chatbotContainer = document.getElementById("chatbotContainer");
+        if (
+          !chatbotContainer.contains(event.target) &&
+          event.target !== chatbotIcon
+        ) {
+          chatbotContainer.style.display = "none";
+        }
+      });
+
+      // Send message on Enter key press
+      document
+        .getElementById("userInput")
+        .addEventListener("keypress", (event) => {
+          if (event.key === "Enter") {
+            const userMessage = event.target.value.trim();
+            if (userMessage) {
+              appendMessage("user", userMessage);
+
+              // Get the best match answer
+              const botReply = getBestMatch(userMessage);
+              appendMessage("bot", botReply);
+
+              event.target.value = ""; // Clear the input field
+            }
+          }
+        });
+    </script> -->
+
+  <script src="script.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+    integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

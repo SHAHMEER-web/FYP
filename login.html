@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Login | Virtually Dial</title>
+    <link rel="shortcut icon" href="img/captcha.png" type="image/x-icon">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto+Slab|Roboto:300,400,500,700"
+        rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+</head>
+
+<body class="bg-blue">
+    <section class="">
+        <div class="container-fluid  vh-100">
+            <div class="container py-5">
+                <div class="row d-flex align-items-center justify-content-center h-100">
+                    <div class="col-xl-6 col-lg-7 col-md-8 col-sm-12 col-12">
+                        <img src="assets/DOC logo.png" class="img-fluid" alt="Phone image" />
+                    </div>
+
+                    <!-- ----------------------------------------------------------------pills tab------------------------------------------------------------ -->
+                    <div style="background-color: white" class="col-md-7 col-lg-5 col-xl-5 offset-xl-1 p-5 mt-5 h-100">
+                        <ul class="nav nav-tabs mb-4 d-flex justify-content-center" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="signin-tab" data-bs-toggle="tab"
+                                    data-bs-target="#signin" type="button" role="tab" aria-controls="signin"
+                                    aria-selected="true">
+                                    Log In
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="register-tab" data-bs-toggle="tab"
+                                    data-bs-target="#register" type="button" role="tab" aria-controls="register"
+                                    aria-selected="false">
+                                    Register
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="myTabContent">
+                            <!-- ----------------------------------------------------------------Sign In---------------------------------------------------------- -->
+                            <div class="tab-pane fade show active" style="margin-top: 80px" id="signin" role="tabpanel"
+                                aria-labelledby="signin-tab">
+                                <form>
+                                    <div data-mdb-input-init class="form-outline mb-4 d-flex">
+                                        <i class="fa-regular fa-user rounded-start icon"></i>
+                                        <input type="number" id="signin-email" placeholder="ID"
+                                            class="form-control form-control-lg" />
+                                    </div>
+                                    <div data-mdb-input-init class="form-outline mb-4 d-flex">
+                                        <i class="fa-solid fa-key rounded-start icon"></i>
+                                        <input type="password" id="signin-password" placeholder="Password"
+                                            class="form-control form-control-lg" />
+                                    </div>
+                                    <div class="d-flex justify-content-start align-items-center mb-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="remember-me" />
+                                            <label class="form-check-label" for="remember-me">
+                                                Remember me
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="submit"
+                                        class="bg-blue text-white border-0 btn-lg btn-block w-100 text-center rounded-pill">
+                                        Sign In
+                                    </button>
+                                    <a href="index.html" class="d-flex justify-content-center mt-4 blue"
+                                        style="text-decoration: none">Forgot password?</a>
+                                </form>
+                            </div>
+                            <!-- ----------------------------------------------------------------Register---------------------------------------------------------- -->
+                            <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+                                <form>
+                                    <div class="d-flex justify-content-evenly" style="gap: 10px">
+                                        <div data-mdb-input-init class="form-outline mb-3 d-flex">
+                                            <input type="text" id="register-name" placeholder="First Name *"
+                                                class="form-control form-control-md" required />
+                                        </div>
+                                        <div data-mdb-input-init class="form-outline mb-3 d-flex">
+                                            <input type="text" id="register-email" placeholder="Last Name *"
+                                                class="form-control form-control-md" required />
+                                        </div>
+                                    </div>
+
+                                    <div data-mdb-input-init class="form-outline mx-2 mb-3 d-flex ">
+                                        <input type="text" id="register-password" placeholder="Contact Email *"
+                                            class="form-control form-control-md" required />
+                                    </div>
+                                    <div class="d-flex justify-content-evenly" style="gap: 10px">
+                                        <div data-mdb-input-init class="form-outline mb-3 d-flex">
+                                            <input type="number" id="register-name" placeholder="ID *"
+                                                class="form-control form-control-md" required />
+                                        </div>
+                                        <div data-mdb-input-init class="form-outline mb-3 d-flex">
+                                            <input type="text" id="designation" placeholder="Designation "
+                                                class="form-control form-control-md" required />
+                                        </div>
+
+                                    </div>
+                                    <div data-mdb-input-init class="form-outline mb-3 d-flex">
+                                        <input type="text" id="Dpeartment" placeholder="Designation "
+                                            class="form-control form-control-md" required />
+
+                                    </div>
+
+                                    <div style="width: 300px; border: 1px solid ghostwhite"
+                                        class="conatiner shadow-sm p-3 mb-3 bg-body rounded">
+                                        <div class="col d-flex justify-content-start text-center" style="gap: 10px">
+                                            <input class="form-check-input" style="height: 30px; width: 30px"
+                                                type="checkbox" value="" id="flexCheckDefault" />
+                                            <h5 class="fs-6 mt-2">I am not a Robot</h5>
+                                            <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png"
+                                                style="height: 40px; width: 40px" class="ms-4 img-fluid" alt="" />
+                                        </div>
+                                    </div>
+                                    <button type="submit"
+                                        class="bg-blue text-white btn-lg btn-block w-100 text-center border-0 rounded-pill">
+                                        Register
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+
+</html>
