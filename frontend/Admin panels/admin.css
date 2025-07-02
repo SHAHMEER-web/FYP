@@ -1,0 +1,134 @@
+body {
+  background-color: #f8f9fa;
+}
+
+.admin-header {
+  background-color: #343a40;
+  color: #fff;
+  padding: 15px;
+}
+
+.logout-btn {
+  color: #fff;
+  border: 1px solid #fff;
+}
+
+.logout-btn:hover {
+  color: #343a40;
+  background-color: #fff;
+}
+
+/* ======================= HOD Message ====================== */
+
+.hod-card {
+  display: flex;
+  flex-direction: column;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+.hod-content-container {
+  flex: 1;
+  min-width: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hod-image-container img {
+  max-width: 120px;
+  height: auto;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+
+/* ================= Societies images =================== */
+
+button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #15580c;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-container {
+  display: flex;
+  gap: 10px;
+  width: 90%;
+  max-width: 500px;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.todo-list {
+  margin-top: 20px;
+  width: 90%;
+  max-width: 500px;
+  list-style: none;
+  padding: 0;
+}
+
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.delete-btn {
+  padding: 5px 10px;
+  border: none;
+  background-color: #ff4d4d;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background-color: #cc0000;
+}
+
+/* =========================================== Societies =========================================== */
+.image-container-society {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.image-container-society img {
+  width: 100px;
+  height: auto;
+  margin-right: 10px;
+  border-radius: 5px;
+}
+
+.remove-btn-society {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.section-box-society {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  background: #f9f9f9;
+}

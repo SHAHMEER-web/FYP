@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+  <!-- Admin Panel Header -->
+  <header class="admin-header d-flex justify-content-between align-items-center">
+    <h1 class="ms-3">Admin Panel</h1>
+    <button class="btn logout-btn me-3" onclick="logout()">Logout</button>
+    <script>
+      // Check if the user is already logged in
+      function checkLoginStatus() {
+        const isLoggedIn = sessionStorage.getItem("isLoggedIn");
+        if (!isLoggedIn) {
+          // Redirect to login page if not logged in
+          window.location.href = "../login.html"; // Replace with your login page URL
+        }
+      }
+
+      // Logout function
+      function logout() {
+        sessionStorage.removeItem("isLoggedIn");
+        window.location.href = "../login.html"; // Redirect to login page
+      }
+
+      // Call checkLoginStatus on page load
+      document.addEventListener("DOMContentLoaded", checkLoginStatus);
+    </script>
+  </header>
+
+  <!-- Admin Panel Content -->
+  <main class="container mt-5">
+    <div class="row">
+
+
+      <!-- ====================================== Tab pane Buttons ======================================= -->
+      <div class="col-4">
+        <div class="d-flex align-items-start">
+          <div class="nav d-flex flex-column justify-content-start nav-pills " id="v-pills-tab" role="tablist"
+            aria-orientation="vertical">
+            <button class="nav-link active text-start" id="v-pills-home-tab" data-bs-toggle="pill"
+              data-bs-target="#v-pills-home" type="button" role="tab" aria-controls="v-pills-home"
+              aria-selected="true">Home</button>
+            <button class="nav-link text-start" id="v-pills-profile-tab" data-bs-toggle="pill"
+              data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile"
+              aria-selected="false">Coordinators Images</button>
+            <button class="nav-link text-start" id="v-pills-timetable-tab" data-bs-toggle="pill"
+              data-bs-target="#v-pills-timetable" type="button" role="tab" aria-controls="v-pills-timetable"
+              aria-selected="false">Add Faculty Members</button>
+            <button class="nav-link text-start" id="v-pills-messages-tab" data-bs-toggle="pill"
+              data-bs-target="#v-pills-messages" type="button" role="tab" aria-controls="v-pills-messages"
+              aria-selected="false">Announcements</button>
+            <button class="nav-link text-start" id="v-pills-settings-tab" data-bs-toggle="pill"
+              data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings"
+              aria-selected="false">Societies Images</button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ====================================== Tab pane Content ======================================= -->
+      <div class="col-8">
+        <div class="tab-content" id="v-pills-tabContent">
+
+          <!--==================================== Add HOD Message ============================================-->
+
+          <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab"
+            tabindex="0">
+            <div class="col-12">
+              <div class="container mt-5">
+                <h3>Add HOD's Message</h3>
+                <form id="adminDataForm">
+                  <div class="mb-3">
+                    <label for="title" class="form-label">Title:</label>
+                    <input type="text" id="title" class="form-control" placeholder="Enter title" required />
+                  </div>
+                  <div class="mb-3">
+                    <label for="description" class="form-label">Description:</label>
+                    <textarea id="description" class="form-control" placeholder="Enter description" required></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label for="author" class="form-label">Author:</label>
+                    <input type="text" id="author" class="form-control" placeholder="Enter author name" required />
+                  </div>
+                  <div class="mb-3">
+                    <label for="image" class="form-label">Upload Image:</label>
+                    <input type="file" id="image" class="form-control" accept="image/*" required />
+                  </div>
+
+                  <button type="submit" class="btn btn-primary">Add Data</button>
+                </form>
+
+                <div id="dynamicContent" class="mt-5"></div>
+              </div>
+
+              <!--------------------- HOD Message JavaScript Code ---------------------------->
+
+              <script>
+                // DOM Elements
+                const adminDataForm = document.getElementById("adminDataForm");
+                const dynamicContent = document.getElementById("dynamicContent");
+
+                // Function to Load and Display Data
+                const displayData = () => {
+                  let savedContent = JSON.parse(localStorage.getItem("dynamicContent")) || [];
+                  console.log("Saved Data on Load:", savedContent); // Debugging
+
+                  dynamicContent.innerHTML = ""; // Clear previous content
+
+                  if (savedContent.length === 0) {
+                    dynamicContent.innerHTML = "<p class='text-muted'>No data available.</p>";
+                    return;
+                  }
+
+                  savedContent.forEach((item, index) => {
+                    const card = document.createElement("div");
+                    card.className = "hod-card my-3 p-3 shadow-sm";
+                    card.dataset.index = index;
+
+                    card.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <div class="hod-content-container">
+                        <h4>${item.title}</h4>
+                        <p>${item.description}</p>
+                        <p class="fw-bold">${item.author}</p> <!-- Author added -->
+                    </div>
+                    <div class="hod-image-container ms-3">
+                        <img src="${item.image}" alt="Uploaded Image" class="rounded img-fluid">
+                    </div>
+                </div>
+                <button class="btn btn-danger btn-sm delete-btn mt-3">Delete</button>
+            `;
+
+                    dynamicContent.appendChild(card);
+                  });
+                };
+
+                // Handle Form Submission
+                adminDataForm.addEventListener("submit", (event) => {
+                  event.preventDefault();
+
+                  const title = document.getElementById("title").value.trim();
+                  const description = document.getElementById("description").value.trim();
+                  const author = document.getElementById("author").value.trim();
+                  const imageInput = document.getElementById("image");
+
+                  if (!title || !description || !author || !imageInput.files[0]) {
+                    alert("Please fill out all fields and upload an image.");
+                    return;
+                  }
+
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    const image = reader.result;
+
+                    let savedContent = JSON.parse(localStorage.getItem("dynamicContent")) || [];
+
+                    savedContent.push({ title, description, author, image });
+
+                    // Save to localStorage
+                    localStorage.setItem("dynamicContent", JSON.stringify(savedContent));
+                    console.log("Data Saved:", savedContent); // Debugging
+
+                    displayData(); // Refresh content
+                    adminDataForm.reset();
+                  };
+
+                  reader.readAsDataURL(imageInput.files[0]);
+                });
+
+                // Handle Delete Button
+                dynamicContent.addEventListener("click", (event) => {
+                  if (event.target.classList.contains("delete-btn")) {
+                    const index = event.target.closest(".hod-card").dataset.index;
+                    let savedContent = JSON.parse(localStorage.getItem("dynamicContent")) || [];
+
+                    savedContent.splice(index, 1);
+                    localStorage.setItem("dynamicContent", JSON.stringify(savedContent));
+
+                    displayData();
+                  }
+                });
+
+                // Initialize Display Data on Page Load
+                document.addEventListener("DOMContentLoaded", () => {
+                  // checkLoginStatus();  // TEMPORARILY DISABLED for Debugging
+                  displayData();
+                });
+              </script>
+
+            </div>
+          </div>
+
+
+          <!--==================================== Add Coordinators Images ============================================-->
+
+          <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab"
+            tabindex="0">
+            <div class="container mt-5 coordinator">
+              <h2 class="text-center">Manage Coordinators</h2>
+
+              <form id="coordinatorForm" class="mb-4">
+                <div class="mb-2">
+                  <input type="text" id="name" class="form-control" placeholder="Name" required>
+                </div>
+                <div class="mb-2">
+                  <input type="text" id="designation" class="form-control" placeholder="Designation" required>
+                </div>
+                <div class="mb-2">
+                  <input type="file" id="imageUpload" class="form-control" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Add Coordinator</button>
+              </form>
+
+              <h4>Coordinators List</h4>
+              <div id="coordinatorsList" class="row"></div>
+            </div>
+
+            <!--------------------- Coordinators Images JavaScript Code ---------------------------->
+
+            <script>
+              document.addEventListener("DOMContentLoaded", function () {
+                const form = document.getElementById("coordinatorForm");
+                const imageUpload = document.getElementById("imageUpload");
+                const coordinatorsList = document.getElementById("coordinatorsList");
+
+                function getCoordinators() {
+                  return JSON.parse(localStorage.getItem("coordinators")) || [];
+                }
+
+                function saveCoordinators(coordinators) {
+                  localStorage.setItem("coordinators", JSON.stringify(coordinators));
+                }
+
+                function renderCoordinators() {
+                  coordinatorsList.innerHTML = "";
+                  const coordinators = getCoordinators();
+
+                  coordinators.forEach((coordinator, index) => {
+                    const card = document.createElement("div");
+                    card.classList.add("col-md-4", "mb-3");
+                    card.innerHTML = `
+                        <div class="card text-center p-2">
+                            <img src="${coordinator.imageURL}" class="card-img-top mx-auto img-fluid" style="width: 80px; height: 80px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title">${coordinator.name}</h5>
+                                <p class="card-text">${coordinator.designation}</p>
+                                <button class="btn btn-danger btn-sm" onclick="deleteCoordinator(${index})">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    coordinatorsList.appendChild(card);
+                  });
+                }
+
+                form.addEventListener("submit", function (e) {
+                  e.preventDefault();
+                  const name = document.getElementById("name").value;
+                  const designation = document.getElementById("designation").value;
+                  const file = imageUpload.files[0];
+
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                      const imageURL = event.target.result;
+                      const coordinators = getCoordinators();
+                      coordinators.push({ name, designation, imageURL });
+                      saveCoordinators(coordinators);
+                      renderCoordinators();
+                      form.reset();
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                });
+
+                window.deleteCoordinator = function (index) {
+                  const coordinators = getCoordinators();
+                  coordinators.splice(index, 1);
+                  saveCoordinators(coordinators);
+                  renderCoordinators();
+                };
+
+                renderCoordinators();
+              });
+            </script>
+
+          </div>
+
+          <!--===================================== Departments Faculty uploading ==================================== -->
+
+          <div class="tab-pane fade" id="v-pills-timetable" role="tabpanel" aria-labelledby="v-pills-timetable-tab"
+            tabindex="0">
+            <div class="container mt-5">
+              <h2 class="text-center">Admin Panel - Add Faculty</h2>
+            
+              <form id="facultyForm">
+                <div class="mb-3">
+                  <label class="form-label">Select Department</label>
+                  <select id="facultySection" class="form-select" required>
+                    <option value="CS">Computer Science</option>
+                    <option value="AI">Artificial Intelligence</option>
+                    <option value="SE">Software Engineering</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Name</label>
+                  <input type="text" id="name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Designation</label>
+                  <input type="text" id="designation" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Upload Image</label>
+                  <input type="file" id="image" class="form-control" accept="image/*" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Upload CV (PDF)</label>
+                  <input type="file" id="cv" class="form-control" accept=".pdf" required>
+                </div>
+                <button type="submit" class="btn btn-success">Add Faculty</button>
+              </form>
+            
+              <h3 class="mt-5">Faculty List</h3>
+            
+              <div class="mb-3">
+                <label class="fw-bold">Select Department to View:</label>
+                <select id="adminFacultySection" class="form-select w-50" onchange="loadFaculty()">
+                  <option value="CS">Computer Science</option>
+                  <option value="AI">Artificial Intelligence</option>
+                  <option value="SE">Software Engineering</option>
+                </select>
+              </div>
+            
+              <ul id="facultyList" class="list-group mt-3"></ul>
+            </div>
+            
+            <script>
+              document.addEventListener('DOMContentLoaded', loadFaculty);
+
+              document.getElementById('facultyForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                let section = document.getElementById('facultySection').value;
+                let name = document.getElementById('name').value;
+                let designation = document.getElementById('designation').value;
+                let imageFile = document.getElementById('image').files[0];
+                let cvFile = document.getElementById('cv').files[0];
+
+                if (!imageFile || !cvFile) {
+                  alert('Please upload both an image and a CV.');
+                  return;
+                }
+
+                let reader1 = new FileReader();
+                let reader2 = new FileReader();
+                let imageBase64 = "";
+
+                reader1.onload = function (e) {
+                  imageBase64 = e.target.result;
+                  reader2.readAsDataURL(cvFile);
+                };
+
+                reader2.onload = function (e) {
+                  let cvBase64 = e.target.result;
+
+                  let facultyData = JSON.parse(localStorage.getItem('facultyData')) || { CS: [], AI: [], SE: [] };
+                  let facultyMember = { name, designation, image: imageBase64, cv: cvBase64 };
+
+                  facultyData[section].push(facultyMember);
+                  localStorage.setItem('facultyData', JSON.stringify(facultyData));
+
+                  loadFaculty();
+                  document.getElementById('facultyForm').reset();
+                };
+
+                reader1.readAsDataURL(imageFile);
+              });
+
+              function loadFaculty() {
+                let selectedSection = document.getElementById('adminFacultySection').value;
+                let facultyData = JSON.parse(localStorage.getItem('facultyData')) || { CS: [], AI: [], SE: [] };
+                let facultyList = facultyData[selectedSection] || [];
+
+                let facultyContainer = document.getElementById('facultyList');
+                facultyContainer.innerHTML = "";
+
+                facultyList.forEach((faculty, index) => {
+                  let li = document.createElement('li');
+                  li.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+                  li.innerHTML = `
+                                <div>
+                                    <img src="${faculty.image}" width="50" height="50" class="rounded-circle me-2">
+                                    <strong>${faculty.name}</strong> - ${faculty.designation}
+                                    <a href="${faculty.cv}" target="_blank" class="btn btn-sm btn-primary">View Profile</a>
+                                </div>
+                                <button class="btn btn-danger btn-sm" onclick="deleteFaculty('${selectedSection}', ${index})">Delete</button>
+                            `;
+
+                  facultyContainer.appendChild(li);
+                });
+              }
+
+              function deleteFaculty(section, index) {
+                let facultyData = JSON.parse(localStorage.getItem('facultyData')) || { CS: [], AI: [], SE: [] };
+                facultyData[section].splice(index, 1);
+                localStorage.setItem('facultyData', JSON.stringify(facultyData));
+                loadFaculty();
+              }
+            </script>
+
+          </div>
+
+
+          <!--====================================== News and Announcement Section ================================== -->
+
+          <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab"
+            tabindex="0">
+            <div class="announcement">
+              <h1>Make Announcements here</h1>
+            </div>
+            <div class="news-form-container pt-3">
+              <input type="text" id="inputField" placeholder="Enter announcement..." />
+              <button id="saveButton">Add</button>
+            </div>
+
+            <ul class="todo-list" id="todoList">
+              <!-- List items will be dynamically added here -->
+            </ul>
+
+            <a href="display.html" class="link">Go to Display Page</a>
+
+
+            <!------------------------------ News JavaScript ------------------------------>
+            <script>
+              const inputField = document.getElementById('inputField');
+              const saveButton = document.getElementById('saveButton');
+              const todoList = document.getElementById('todoList');
+
+              // Function to load items from localStorage
+              const loadItems = () => {
+                const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
+                todoList.innerHTML = ''; // Clear the list
+                items.forEach((item, index) => {
+                  addTodoItemToDOM(item, index);
+                });
+              };
+
+              // Function to add a new item to the DOM
+              const addTodoItemToDOM = (text, index) => {
+                const li = document.createElement('li');
+                li.className = 'todo-item';
+
+                const span = document.createElement('span');
+                span.textContent = text;
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-btn';
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => {
+                  deleteItem(index);
+                });
+
+                li.appendChild(span);
+                li.appendChild(deleteButton);
+                todoList.appendChild(li);
+              };
+
+              // Function to save a new item
+              const saveItem = () => {
+                const text = inputField.value.trim();
+                if (text) {
+                  const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
+                  items.push(text);
+                  localStorage.setItem('scrollItems', JSON.stringify(items));
+                  addTodoItemToDOM(text, items.length - 1);
+                  inputField.value = '';
+                  updateBanner(); // Update announcement banner
+                } else {
+                  alert('Please enter some text!');
+                }
+              };
+
+              // Function to delete an item
+              const deleteItem = (index) => {
+                const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
+                items.splice(index, 1);
+                localStorage.setItem('scrollItems', JSON.stringify(items));
+                loadItems(); // Reload the list
+                updateBanner(); // Update banner after deletion
+              };
+
+              // Function to update the announcement banner
+              const updateBanner = () => {
+                const bannerContent = document.getElementById('announcementText');
+                const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
+                bannerContent.innerHTML = items.length ? items.map(item => `<p>${item}</p>`).join('') : "<p>No announcements</p>";
+              };
+
+              // Event listener for the "Add" button
+              saveButton.addEventListener('click', saveItem);
+
+              // Load items on page load
+              loadItems();
+              updateBanner(); // Update banner when page loads
+            </script>
+
+
+          </div>
+
+          <!--====================================== Add Societies Images ================================== -->
+
+          <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab"
+            tabindex="0">
+            <div class="societies-image-div">
+            <h1 class="text-center">Upload Societies Images</h1>
+
+            <div class="mb-3">
+              <label for="sectionSelectSociety" class="form-label">Select Section:</label>
+              <select id="sectionSelectSociety" class="form-select">
+                <option value="" disabled selected>Select Section</option>
+                <option value="HUAI">HUAI</option>
+                <option value="HUCS">HUCS</option>
+                <option value="HUDSC">HUDSC</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <input type="file" id="imageInputSociety" accept="image/*" class="form-control" />
+            </div>
+
+            <button id="addButtonSociety" class="btn btn-primary">Add Image</button>
+
+            <h2 class="mt-5">Uploaded Images</h2>
+
+            <!-- Bootstrap Grid: 3 Columns for 3 Sections -->
+            <div class="row mt-4">
+              <div class="col-md-4">
+                <div class="section-box-society">
+                  <h3 class="text-center">HUAI</h3>
+                  <div class="image-gallery-society" id="HUAIListSociety"></div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="section-box-society">
+                  <h3 class="text-center">HUCS</h3>
+                  <div class="image-gallery-society" id="HUCSListSociety"></div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="section-box-society">
+                  <h3 class="text-center">HUDSC</h3>
+                  <div class="image-gallery-society" id="HUDSCListSociety"></div>
+                </div>
+              </div>
+            </div>
+            </div>
+
+            <!--------------------- Societies Images JavaScript Code ---------------------------->
+
+            <script>
+              const sectionSelectSociety = document.getElementById('sectionSelectSociety');
+              const imageInputSociety = document.getElementById('imageInputSociety');
+              const addButtonSociety = document.getElementById('addButtonSociety');
+
+              const HUAIListSociety = document.getElementById('HUAIListSociety');
+              const HUCSListSociety = document.getElementById('HUCSListSociety');
+              const HUDSCListSociety = document.getElementById('HUDSCListSociety');
+
+              const loadImagesSociety = () => {
+                displayImagesSociety("HUAI", HUAIListSociety);
+                displayImagesSociety("HUCS", HUCSListSociety);
+                displayImagesSociety("HUDSC", HUDSCListSociety);
+              };
+
+              const displayImagesSociety = (section, container) => {
+                const imagesSociety = JSON.parse(localStorage.getItem(section)) || [];
+                container.innerHTML = '';
+
+                imagesSociety.forEach((image, index) => {
+                  const imageContainerSociety = document.createElement('div');
+                  imageContainerSociety.className = 'image-container-society d-flex justify-content-between align-items-center';
+
+                  const imgSociety = document.createElement('img');
+                  imgSociety.src = image;
+                  imgSociety.alt = `Image ${index + 1}`;
+
+                  const removeBtnSociety = document.createElement('button');
+                  removeBtnSociety.className = 'remove-btn-society btn-sm';
+                  removeBtnSociety.textContent = 'Remove';
+                  removeBtnSociety.addEventListener('click', () => deleteImageSociety(section, index));
+
+                  imageContainerSociety.appendChild(imgSociety);
+                  imageContainerSociety.appendChild(removeBtnSociety);
+                  container.appendChild(imageContainerSociety);
+                });
+              };
+
+              const addImageSociety = () => {
+                const fileSociety = imageInputSociety.files[0];
+                const selectedSectionSociety = sectionSelectSociety.value;
+
+                if (!selectedSectionSociety) {
+                  alert("Please select a section before uploading an image!");
+                  return;
+                }
+
+                if (!fileSociety) {
+                  alert("Please select an image to upload!");
+                  return;
+                }
+
+                const readerSociety = new FileReader();
+                readerSociety.onload = () => {
+                  const imagesSociety = JSON.parse(localStorage.getItem(selectedSectionSociety)) || [];
+                  imagesSociety.push(readerSociety.result);
+                  localStorage.setItem(selectedSectionSociety, JSON.stringify(imagesSociety));
+                  loadImagesSociety();
+                  imageInputSociety.value = '';
+                  sectionSelectSociety.value = '';
+                };
+                readerSociety.readAsDataURL(fileSociety);
+              };
+
+              const deleteImageSociety = (section, index) => {
+                const imagesSociety = JSON.parse(localStorage.getItem(section)) || [];
+                imagesSociety.splice(index, 1);
+                localStorage.setItem(section, JSON.stringify(imagesSociety));
+                loadImagesSociety();
+              };
+
+              addButtonSociety.addEventListener('click', addImageSociety);
+              document.addEventListener('DOMContentLoaded', loadImagesSociety);
+            </script>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- JavaScript for Login Check and Logout -->
+
+  <script defer src="admin.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
