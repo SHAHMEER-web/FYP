@@ -18,10 +18,16 @@
       // Check if the user is already logged in
       function checkLoginStatus() {
         const isLoggedIn = sessionStorage.getItem("isLoggedIn");
-        if (!isLoggedIn) {
-          // Redirect to login page if not logged in
-          window.location.href = "../login.html"; // Replace with your login page URL
+        if (isLoggedIn !== "true" || !loginTime || currentTime - loginTime > 3600000) {
+          forceLogout();
         }
+        sessionStorage.setItem("userRole", result.role);
+        const role = sessionStorage.getItem("userRole");
+        if (role !== "hod") {
+          alert("Unauthorized access.");
+          forceLogout();
+        }
+
       }
 
       // Logout function
@@ -214,7 +220,7 @@
                   <input type="text" id="designation" class="form-control" placeholder="Designation" required>
                 </div>
                 <div class="mb-2">
-                  <input type="file" id="imageUpload" class="form-control" accept="image/*" required>
+                  <input type="file" id="imageUpload" class="form-control" name="image" accept="image/*" required>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Add Coordinator</button>
               </form>
@@ -260,24 +266,122 @@
                   });
                 }
 
-                form.addEventListener("submit", function (e) {
-                  e.preventDefault();
-                  const name = document.getElementById("name").value;
-                  const designation = document.getElementById("designation").value;
-                  const file = imageUpload.files[0];
+                // form.addEventListener("submit", async function (e) {
+                //   e.preventDefault();
 
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (event) {
-                      const imageURL = event.target.result;
-                      const coordinators = getCoordinators();
-                      coordinators.push({ name, designation, imageURL });
-                      saveCoordinators(coordinators);
-                      renderCoordinators();
-                      form.reset();
-                    };
-                    reader.readAsDataURL(file);
+                //   const name = document.getElementById("name").value;
+                //   const designation = document.getElementById("designation").value;
+                //   const file = imageUpload.files[0];
+
+                //   if (!name || !designation || !file) {
+                //     alert("All fields are required.");
+                //     return;
+                //   }
+
+                //   const formData = new FormData();
+                //   formData.append("name", name);
+                //   formData.append("designation", designation);
+                //   formData.append("image", file);
+
+                //   try {
+                //     const response = await fetch('/api/coordinator', {
+                //       method: 'POST',
+                //       body: formData
+                //     });
+
+                //     const result = await response.json();
+
+                //     if (response.ok) {
+                //       alert("Coordinator added successfully!");
+                //       form.reset();
+                //       // Optionally reload or render updated list
+                //     } else {
+                //       alert("Error: " + result.message);
+                //     }
+                //   } catch (error) {
+                //     console.error(error);
+                //     alert("Server error");
+                //   }
+                // });
+
+                document.addEventListener("DOMContentLoaded", function () {
+                  const form = document.getElementById("coordinatorForm");
+                  const imageUpload = document.getElementById("imageUpload");
+                  const coordinatorsList = document.getElementById("coordinatorsList");
+
+                  // ✅ Load and render coordinators from backend
+                  async function loadCoordinators() {
+                    coordinatorsList.innerHTML = '';
+                    try {
+                      const response = await fetch('/api/coordinator');
+                      const coordinators = await response.json();
+
+                      coordinators.forEach(coordinator => {
+                        const card = document.createElement("div");
+                        card.classList.add("col-md-4", "mb-3");
+                        card.innerHTML = `
+            <div class="card text-center p-2">
+              <img src="default-avatar.png" class="card-img-top mx-auto img-fluid" style="width: 80px; height: 80px; object-fit: cover;">
+              <div class="card-body">
+                <h5 class="card-title">${coordinator.name}</h5>
+                <p class="card-text">${coordinator.designation}</p>
+              </div>
+            </div>
+          `;
+                        coordinatorsList.appendChild(card);
+                      });
+
+                      if (coordinators.length === 0) {
+                        coordinatorsList.innerHTML = "<p>No coordinators found.</p>";
+                      }
+
+                    } catch (error) {
+                      console.error("Failed to fetch coordinators:", error);
+                      coordinatorsList.innerHTML = "<p>Error loading coordinators.</p>";
+                    }
                   }
+
+                  // ✅ Submit form to backend
+                  form.addEventListener("submit", async function (e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById("name").value;
+                    const designation = document.getElementById("designation").value;
+                    const file = imageUpload.files[0];
+
+                    if (!name || !designation || !file) {
+                      alert("All fields are required.");
+                      return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append("name", name);
+                    formData.append("designation", designation);
+                    formData.append("image", file);
+
+                    try {
+                      const response = await fetch('/api/coordinator', {
+                        method: 'POST',
+                        body: formData
+                      });
+
+                      const result = await response.json();
+
+                      if (response.ok) {
+                        alert("Coordinator added successfully!");
+                        form.reset();
+                        loadCoordinators(); // 🔁 refresh list
+                      } else {
+                        alert("Error: " + result.message);
+                      }
+                    } catch (error) {
+                      console.error(error);
+                      alert("Server error");
+                    }
+                  });
+
+                  // 🚀 Load coordinators when page loads
+                  loadCoordinators();
                 });
 
                 window.deleteCoordinator = function (index) {
@@ -299,7 +403,7 @@
             tabindex="0">
             <div class="container mt-5">
               <h2 class="text-center">Admin Panel - Add Faculty</h2>
-            
+
               <form id="facultyForm">
                 <div class="mb-3">
                   <label class="form-label">Select Department</label>
@@ -327,9 +431,9 @@
                 </div>
                 <button type="submit" class="btn btn-success">Add Faculty</button>
               </form>
-            
+
               <h3 class="mt-5">Faculty List</h3>
-            
+
               <div class="mb-3">
                 <label class="fw-bold">Select Department to View:</label>
                 <select id="adminFacultySection" class="form-select w-50" onchange="loadFaculty()">
@@ -338,10 +442,10 @@
                   <option value="SE">Software Engineering</option>
                 </select>
               </div>
-            
+
               <ul id="facultyList" class="list-group mt-3"></ul>
             </div>
-            
+
             <script>
               document.addEventListener('DOMContentLoaded', loadFaculty);
 
@@ -521,49 +625,49 @@
           <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab"
             tabindex="0">
             <div class="societies-image-div">
-            <h1 class="text-center">Upload Societies Images</h1>
+              <h1 class="text-center">Upload Societies Images</h1>
 
-            <div class="mb-3">
-              <label for="sectionSelectSociety" class="form-label">Select Section:</label>
-              <select id="sectionSelectSociety" class="form-select">
-                <option value="" disabled selected>Select Section</option>
-                <option value="HUAI">HUAI</option>
-                <option value="HUCS">HUCS</option>
-                <option value="HUDSC">HUDSC</option>
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <input type="file" id="imageInputSociety" accept="image/*" class="form-control" />
-            </div>
-
-            <button id="addButtonSociety" class="btn btn-primary">Add Image</button>
-
-            <h2 class="mt-5">Uploaded Images</h2>
-
-            <!-- Bootstrap Grid: 3 Columns for 3 Sections -->
-            <div class="row mt-4">
-              <div class="col-md-4">
-                <div class="section-box-society">
-                  <h3 class="text-center">HUAI</h3>
-                  <div class="image-gallery-society" id="HUAIListSociety"></div>
-                </div>
+              <div class="mb-3">
+                <label for="sectionSelectSociety" class="form-label">Select Section:</label>
+                <select id="sectionSelectSociety" class="form-select">
+                  <option value="" disabled selected>Select Section</option>
+                  <option value="HUAI">HUAI</option>
+                  <option value="HUCS">HUCS</option>
+                  <option value="HUDSC">HUDSC</option>
+                </select>
               </div>
 
-              <div class="col-md-4">
-                <div class="section-box-society">
-                  <h3 class="text-center">HUCS</h3>
-                  <div class="image-gallery-society" id="HUCSListSociety"></div>
-                </div>
+              <div class="mb-3">
+                <input type="file" id="imageInputSociety" accept="image/*" class="form-control" />
               </div>
 
-              <div class="col-md-4">
-                <div class="section-box-society">
-                  <h3 class="text-center">HUDSC</h3>
-                  <div class="image-gallery-society" id="HUDSCListSociety"></div>
+              <button id="addButtonSociety" class="btn btn-primary">Add Image</button>
+
+              <h2 class="mt-5">Uploaded Images</h2>
+
+              <!-- Bootstrap Grid: 3 Columns for 3 Sections -->
+              <div class="row mt-4">
+                <div class="col-md-4">
+                  <div class="section-box-society">
+                    <h3 class="text-center">HUAI</h3>
+                    <div class="image-gallery-society" id="HUAIListSociety"></div>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="section-box-society">
+                    <h3 class="text-center">HUCS</h3>
+                    <div class="image-gallery-society" id="HUCSListSociety"></div>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="section-box-society">
+                    <h3 class="text-center">HUDSC</h3>
+                    <div class="image-gallery-society" id="HUDSCListSociety"></div>
+                  </div>
                 </div>
               </div>
-            </div>
             </div>
 
             <!--------------------- Societies Images JavaScript Code ---------------------------->
