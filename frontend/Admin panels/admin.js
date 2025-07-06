@@ -160,5 +160,3 @@ function deleteFaculty(section, index) {
 
 
 
-
-

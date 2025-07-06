@@ -13,7 +13,7 @@ document.getElementById("registerForm").addEventListener("submit", async functio
     };
 
     try {
-        const response = await fetch('/api/signup', {
+        const response = await fetch('/api/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -21,7 +21,7 @@ document.getElementById("registerForm").addEventListener("submit", async functio
 
         const result = await response.json();
         if (response.ok) {
-            alert(`Registration successful! Your password is: ${result.otp}`);
+            alert("Registration successful! Admin has been notified");
             window.location.href = "login.html";
         } else {
             alert("Signup failed: " + result.message);
@@ -51,8 +51,11 @@ document.getElementById("loginForm").addEventListener("submit", function (event)
             // Redirect based on role
             if (data.role === "hod") {
                 window.location.href = "Admin panels/admin.html";
+                sessionStorage.setItem("userId", id); // ✅ Save the user ID in session
             } else if (data.role === "coordinator") {
                 window.location.href = "Admin panels/coordinator.html";
+                sessionStorage.setItem("userId", id); // ✅ Save the user ID in session
+
             } else {
                 alert("Role not recognized.");
             }
