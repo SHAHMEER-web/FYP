@@ -266,44 +266,6 @@
                   });
                 }
 
-                // form.addEventListener("submit", async function (e) {
-                //   e.preventDefault();
-
-                //   const name = document.getElementById("name").value;
-                //   const designation = document.getElementById("designation").value;
-                //   const file = imageUpload.files[0];
-
-                //   if (!name || !designation || !file) {
-                //     alert("All fields are required.");
-                //     return;
-                //   }
-
-                //   const formData = new FormData();
-                //   formData.append("name", name);
-                //   formData.append("designation", designation);
-                //   formData.append("image", file);
-
-                //   try {
-                //     const response = await fetch('/api/coordinator', {
-                //       method: 'POST',
-                //       body: formData
-                //     });
-
-                //     const result = await response.json();
-
-                //     if (response.ok) {
-                //       alert("Coordinator added successfully!");
-                //       form.reset();
-                //       // Optionally reload or render updated list
-                //     } else {
-                //       alert("Error: " + result.message);
-                //     }
-                //   } catch (error) {
-                //     console.error(error);
-                //     alert("Server error");
-                //   }
-                // });
-
                 document.addEventListener("DOMContentLoaded", function () {
                   const form = document.getElementById("coordinatorForm");
                   const imageUpload = document.getElementById("imageUpload");
