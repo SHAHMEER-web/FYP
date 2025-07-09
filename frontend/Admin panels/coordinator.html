@@ -15,12 +15,15 @@
   <!-- Admin Panel Header -->
   <header class="admin-header d-flex justify-content-between align-items-center">
     <h1 class="ms-3"> Coordinator Panel</h1>
-    <button class="btn logout-btn me-3" onclick="logout()">Logout</button>
+    <div class="d-flex">
+      <button id="deleteMyAccount" class="btn logout-btn me-3 bg-danger">Delete</button>
+      <button class="btn logout-btn me-3" onclick="logout()">Logout</button>
+    </div>
     <script>
       // Check if the user is already logged in
       function checkLoginStatus() {
         const isLoggedIn = sessionStorage.getItem("isLoggedIn");
-        if (!isLoggedIn) {
+        if (isLoggedIn) {
           // Redirect to login page if not logged in
           window.location.href = "../login.html"; // Replace with your login page URL
         }
@@ -31,6 +34,45 @@
         sessionStorage.removeItem("isLoggedIn");
         window.location.href = "../login.html"; // Redirect to login page
       }
+
+      document.getElementById("deleteMyAccount").addEventListener("click", async () => {
+        const userId = sessionStorage.getItem("userId");
+        if (!userId) {
+          alert("You're not logged in.");
+          return;
+        }
+
+        const confirmDelete = confirm("Are you sure you want to delete your account?");
+        if (!confirmDelete) return;
+        window.location.href = "../login.html";
+        try {
+          const response = await fetch(`/api/delete-user/${userId}`, {
+            method: 'DELETE',
+          });
+
+          const contentType = response.headers.get("content-type");
+          let result;
+
+          if (contentType && contentType.includes("application/json")) {
+            result = await response.json();
+          } else {
+            const text = await response.text();
+            console.error("Non-JSON response:", text);
+            throw new Error("Unexpected server response");
+          }
+
+          if (response.ok) {
+            alert("Your account has been deleted.");
+            sessionStorage.clear();
+            window.location.href = "login.html";
+          } else {
+            alert("Error: " + result.message);
+          }
+        } catch (err) {
+          console.error("Delete failed:", err);
+          alert("Server error. Try again later.");
+        }
+      });
 
       // Call checkLoginStatus on page load
       document.addEventListener("DOMContentLoaded", checkLoginStatus);
