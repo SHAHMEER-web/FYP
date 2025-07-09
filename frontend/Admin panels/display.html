@@ -1,0 +1,19 @@
+<ul id="announcementList"></ul>
+
+<script>
+    async function loadAnnouncements() {
+        const res = await fetch("http://localhost:3000/api/announcements");
+        const data = await res.json();
+
+        const list = document.getElementById("announcementList");
+        list.innerHTML = "";
+
+        data.forEach(a => {
+            const li = document.createElement("li");
+            li.textContent = `[${a.date}] ${a.role.toUpperCase()}: ${a.message}`;
+            list.appendChild(li);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", loadAnnouncements);
+</script>

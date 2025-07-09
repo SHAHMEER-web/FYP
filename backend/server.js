@@ -60,6 +60,25 @@ db.run(`
 );
 
 `)
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS hod_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    description TEXT,
+    author TEXT,
+    image TEXT
+  );
+`);
+
+db.run(`
+    CREATE TABLE IF NOT EXISTS announcements (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  message TEXT,
+  role TEXT NOT NULL,
+  date TEXT NOT NULL
+);`
+);
 // db.run(`
 //     DROP TABLE faculty`)
 
@@ -176,44 +195,6 @@ app.listen(PORT, () => {
 });
 
 
-// Coordinator Route
-// const multer = require('multer');
-// const { log } = require('console');
-// const storage = multer.memoryStorage();
-// const upload = multer({ storage });
-
-// app.post('/api/coordinator', upload.single('image'), (req, res) => {
-//     const { name, designation } = req.body;
-//     const image = req.file?.buffer;
-
-//     if (!name || !designation || !image) {
-//         return res.status(400).json({ message: 'All fields are required' });
-//     }
-
-//     const sql = `
-//     INSERT INTO coordinators (name, designation, image)
-//     VALUES (?, ?, ?)
-//   `;
-
-//     db.run(sql, [name, designation, image], function (err) {
-//         if (err) {
-//             console.error(err.message);
-//             return res.status(500).json({ message: 'Failed to add coordinator' });
-//         }
-//         res.status(200).json({ message: 'Coordinator added successfully' });
-//     });
-// });
-
-// app.get('/api/coordinator', (req, res) => {
-//     db.all(`SELECT id, name, designation FROM coordinators`, [], (err, rows) => {
-//         if (err) {
-//             console.error(err.message);
-//             return res.status(500).json({ message: 'Failed to fetch coordinators' });
-//         }
-//         res.json(rows);
-//     });
-// });
-
 // delete user route
 
 app.delete('/api/delete-user/:id', (req, res) => {
@@ -289,5 +270,93 @@ app.get('/api/faculty', (req, res) => {
         return res.json(rows); // ✅ return result to frontend
     });
 });
+
+
+// Hod Message Route
+
+app.post('/api/hod-message', upload.single('image'), (req, res) => {
+    const { title, description, author } = req.body;
+    const imageBuffer = req.file?.buffer;
+
+    if (!title || !description || !author || !imageBuffer) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+
+    const imageBase64 = imageBuffer.toString('base64');
+
+    const sql = `
+    INSERT INTO hod_messages (title, description, author, image)
+    VALUES (?, ?, ?, ?)
+  `;
+
+    db.run(sql, [title, description, author, imageBase64], function (err) {
+        if (err) {
+            console.error("❌ DB Error:", err.message);
+            return res.status(500).json({ message: "Failed to insert data." });
+        }
+
+        return res.status(200).json({ message: "Message added successfully." });
+    });
+});
+
+app.get('/api/hod-messages', (req, res) => {
+    db.all("SELECT * FROM hod_messages", [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ message: "Database error" });
+        }
+        res.json(rows);
+    });
+});
+
+// Announcement Route
+app.post('/api/announcements', (req, res) => {
+    const { message, role } = req.body;
+
+    if (!message || !role) {
+        return res.status(400).json({ message: "Message and role are required." });
+    }
+
+    const date = new Date().toISOString();
+
+    const sql = `INSERT INTO announcements (message, role, date) VALUES (?, ?, ?)`;
+    db.run(sql, [message, role, date], function (err) {
+        if (err) {
+            console.error("❌ Announcement Insert Error:", err.message);
+            return res.status(500).json({ message: "Failed to save announcement." });
+        }
+        res.status(200).json({ message: "Announcement added successfully." });
+    });
+});
+
+app.get('/api/announcements', (req, res) => {
+    const sql = `SELECT * FROM announcements ORDER BY date DESC`;
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            console.error("❌ Announcement Fetch Error:", err.message);
+            return res.status(500).json({ message: "Failed to fetch announcements." });
+        }
+        res.json(rows);
+    });
+});
+
+app.delete('/api/announcements/:id', (req, res) => {
+    const { id } = req.params;
+
+    const sql = `DELETE FROM announcements WHERE id = ?`;
+    db.run(sql, [id], function (err) {
+        if (err) {
+            console.error("❌ Delete Error:", err.message);
+            return res.status(500).json({ message: "Failed to delete announcement." });
+        }
+
+        if (this.changes === 0) {
+            return res.status(404).json({ message: "Announcement not found." });
+        }
+
+        res.status(200).json({ message: "Announcement deleted successfully." });
+    });
+});
+
+
 
 

@@ -3,6 +3,17 @@
 // Check if the user is already logged in
 function checkLoginStatus() {
   const isLoggedIn = sessionStorage.getItem("isLoggedIn");
+  sessionStorage.setItem("isLoggedIn", "true");
+  sessionStorage.setItem("userId", id);
+  // sessionStorage.setItem("userRole", data.role);
+  sessionStorage.setItem("loginTime", Date.now());
+
+  console.log("User ID:", id);
+  // console.log("User Role:", data.role);
+  console.log("Login Time", Date.now());
+
+
+
   if (!isLoggedIn) {
     window.location.href = "../login.html";
   }
@@ -20,38 +31,7 @@ document.addEventListener("DOMContentLoaded", checkLoginStatus);
 
 
 // ================================ generate news and anouncement ===========================
-const inputField = document.getElementById('inputField');
-const saveButton = document.getElementById('saveButton');
-const todoList = document.getElementById('todoList');
 
-// Function to load items from localStorage
-const loadItems = () => {
-  const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
-  todoList.innerHTML = ''; // Clear the list
-  items.forEach((item, index) => {
-    addTodoItemToDOM(item, index);
-  });
-};
-
-// Function to add a new item to the DOM
-const addTodoItemToDOM = (text, index) => {
-  const li = document.createElement('li');
-  li.className = 'todo-item';
-
-  const span = document.createElement('span');
-  span.textContent = text;
-
-  const deleteButton = document.createElement('button');
-  deleteButton.className = 'delete-btn';
-  deleteButton.textContent = 'Delete';
-  deleteButton.addEventListener('click', () => {
-    deleteItem(index);
-  });
-
-  li.appendChild(span);
-  li.appendChild(deleteButton);
-  todoList.appendChild(li);
-};
 
 // Function to save a new item
 const saveItem = () => {

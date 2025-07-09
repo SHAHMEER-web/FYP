@@ -21,17 +21,26 @@
       // Check if the user is already logged in
       function checkLoginStatus() {
         const isLoggedIn = sessionStorage.getItem("isLoggedIn");
-        if (isLoggedIn !== "true" || !loginTime || currentTime - loginTime > 3600000) {
-          forceLogout();
-        }
-        sessionStorage.setItem("userRole", result.role);
+        const loginTime = sessionStorage.getItem("loginTime");
         const role = sessionStorage.getItem("userRole");
+
+        const currentTime = new Date().getTime();
+
+        if (
+          isLoggedIn !== "true" ||
+          !loginTime ||
+          currentTime - parseInt(loginTime) > 3600000  // 1 hour = 3600000 ms
+        ) {
+          forceLogout(); // Clear session & redirect to login
+          return;
+        }
+
         if (role !== "hod") {
           alert("Unauthorized access.");
           forceLogout();
         }
-
       }
+
 
       // Logout function
       function logout() {
@@ -153,96 +162,78 @@
               <!--------------------- HOD Message JavaScript Code ---------------------------->
 
               <script>
+                async function loadHodMessages() {
+                  try {
+                    const response = await fetch("http://localhost:3000/api/hod-messages");
+                    const messages = await response.json();
+
+                    const container = document.getElementById("dynamicContent");
+                    container.innerHTML = ""; // Clear previous content
+
+                    messages.forEach(msg => {
+                      const card = document.createElement("div");
+                      card.className = "card mb-3 p-3 shadow-sm";
+
+                      card.innerHTML = `
+          <h4>${msg.title}</h4>
+          <p>${msg.description}</p>
+          <p><strong>- ${msg.author}</strong></p>
+          ${msg.image ? `<img src="data:image/png;base64,${msg.image}" style="max-width: 200px;" class="img-fluid rounded">` : ''}
+        `;
+
+                      container.appendChild(card);
+                    });
+                  } catch (err) {
+                    console.error("❌ Failed to load messages:", err);
+                  }
+                }
                 // DOM Elements
-                const adminDataForm = document.getElementById("adminDataForm");
-                const dynamicContent = document.getElementById("dynamicContent");
+                document.addEventListener("DOMContentLoaded", loadHodMessages);
 
-                // Function to Load and Display Data
-                const displayData = () => {
-                  let savedContent = JSON.parse(localStorage.getItem("dynamicContent")) || [];
-                  console.log("Saved Data on Load:", savedContent); // Debugging
+                document.getElementById("adminDataForm").addEventListener("submit", async function (e) {
+                  e.preventDefault();
 
-                  dynamicContent.innerHTML = ""; // Clear previous content
+                  const form = e.target;
+                  const formData = new FormData();
 
-                  if (savedContent.length === 0) {
-                    dynamicContent.innerHTML = "<p class='text-muted'>No data available.</p>";
-                    return;
+
+                  try {
+                    const response = await fetch("http://localhost:3000/api/hod-message", {
+                      method: "POST",
+                      body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                      alert("Message added successfully!");
+                      form.reset();
+                    } else {
+                      alert("Upload failed: " + result.message);
+                    }
+                  } catch (err) {
+                    console.error("❌ Error:", err);
+                    alert("Server error. Try again later.");
                   }
+                });
 
-                  savedContent.forEach((item, index) => {
-                    const card = document.createElement("div");
-                    card.className = "hod-card my-3 p-3 shadow-sm";
-                    card.dataset.index = index;
-
-                    card.innerHTML = `
-                <div class="d-flex align-items-start">
-                    <div class="hod-content-container">
-                        <h4>${item.title}</h4>
-                        <p>${item.description}</p>
-                        <p class="fw-bold">${item.author}</p> <!-- Author added -->
-                    </div>
-                    <div class="hod-image-container ms-3">
-                        <img src="${item.image}" alt="Uploaded Image" class="rounded img-fluid">
-                    </div>
-                </div>
-                <button class="btn btn-danger btn-sm delete-btn mt-3">Delete</button>
-            `;
-
-                    dynamicContent.appendChild(card);
+                fetch("http://localhost:3000/api/hod-messages")
+                  .then(res => res.json())
+                  .then(data => {
+                    const container = document.getElementById("dynamicContent");
+                    data.forEach(item => {
+                      const div = document.createElement("div");
+                      div.innerHTML = `
+        <h4>${item.title}</h4>
+        <p>${item.description}</p>
+        <p><strong>- ${item.author}</strong></p>
+        <img src="data:image/png;base64,${item.image}" style="max-width: 200px;">
+        <hr>
+      `;
+                      container.appendChild(div);
+                    });
                   });
-                };
 
-                // Handle Form Submission
-                adminDataForm.addEventListener("submit", (event) => {
-                  event.preventDefault();
-
-                  const title = document.getElementById("title").value.trim();
-                  const description = document.getElementById("description").value.trim();
-                  const author = document.getElementById("author").value.trim();
-                  const imageInput = document.getElementById("image");
-
-                  if (!title || !description || !author || !imageInput.files[0]) {
-                    alert("Please fill out all fields and upload an image.");
-                    return;
-                  }
-
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    const image = reader.result;
-
-                    let savedContent = JSON.parse(localStorage.getItem("dynamicContent")) || [];
-
-                    savedContent.push({ title, description, author, image });
-
-                    // Save to localStorage
-                    localStorage.setItem("dynamicContent", JSON.stringify(savedContent));
-                    console.log("Data Saved:", savedContent); // Debugging
-
-                    displayData(); // Refresh content
-                    adminDataForm.reset();
-                  };
-
-                  reader.readAsDataURL(imageInput.files[0]);
-                });
-
-                // Handle Delete Button
-                dynamicContent.addEventListener("click", (event) => {
-                  if (event.target.classList.contains("delete-btn")) {
-                    const index = event.target.closest(".hod-card").dataset.index;
-                    let savedContent = JSON.parse(localStorage.getItem("dynamicContent")) || [];
-
-                    savedContent.splice(index, 1);
-                    localStorage.setItem("dynamicContent", JSON.stringify(savedContent));
-
-                    displayData();
-                  }
-                });
-
-                // Initialize Display Data on Page Load
-                document.addEventListener("DOMContentLoaded", () => {
-                  // checkLoginStatus();  // TEMPORARILY DISABLED for Debugging
-                  displayData();
-                });
               </script>
 
             </div>
@@ -442,17 +433,19 @@
 
               <div class="mb-3">
                 <label class="fw-bold">Select Department to View:</label>
-                <select id="adminFacultySection" class="form-select w-50" onchange="loadFaculty()">
+                <select id="adminFacultySection" class="form-select w-50">
                   <option value="CS">Computer Science</option>
                   <option value="AI">Artificial Intelligence</option>
                   <option value="SE">Software Engineering</option>
                 </select>
               </div>
 
-              <ul id="facultyList" class="list-group mt-3"></ul>
+              <div id="facultyList" class="list-group mt-3"></div>
             </div>
 
             <script>
+
+
               document.addEventListener("DOMContentLoaded", function () {
                 // form submit listener here
                 document.getElementById("facultyForm").addEventListener("submit", async function (e) {
@@ -495,6 +488,49 @@
                 });
               });
 
+              async function loadFaculty() {
+                const department = document.getElementById("adminFacultySection").value;
+                const container = document.getElementById("facultyList");
+                container.innerHTML = ""; // Clear current faculty
+
+                try {
+                  const res = await fetch(`http://localhost:3000/api/faculty?department=${department}`);
+                  const data = await res.json();
+
+                  if (!data.length) {
+                    container.innerHTML = "<p>No faculty found for this department.</p>";
+                    return;
+                  }
+
+                  data.forEach(faculty => {
+                    const card = document.createElement("div");
+                    card.className = "col-md-4 mb-3";
+                    card.innerHTML = `
+          <div class="card h-100 shadow-sm">
+            ${faculty.image ? `<img src="data:image/png;base64,${faculty.image}" class="card-img-top" style="height:200px; object-fit:cover;">` : ''}
+            <div class="card-body">
+              <h5 class="card-title">${faculty.name}</h5>
+              <p class="card-text"><strong>${faculty.designation}</strong><br>${faculty.department}</p>
+              ${faculty.cv ? `<a href="data:application/pdf;base64,${faculty.cv}" download="${faculty.name}-CV.pdf" class="btn btn-outline-primary btn-sm">Download CV</a>` : ''}
+            </div>
+          </div>
+        `;
+                    container.appendChild(card);
+                  });
+
+                } catch (err) {
+                  console.error("❌ Error loading faculty:", err);
+                  container.innerHTML = "<p>Failed to load faculty.</p>";
+                }
+              }
+
+              // 🔁 Load faculty when dropdown changes
+              document.getElementById("adminFacultySection").addEventListener("change", loadFaculty);
+
+              // 🔁 Load default on page load
+              document.addEventListener("DOMContentLoaded", loadFaculty);
+
+
 
             </script>
 
@@ -514,8 +550,9 @@
               <button id="saveButton">Add</button>
             </div>
 
-            <ul class="todo-list" id="todoList">
-              <!-- List items will be dynamically added here -->
+            <div id="announcementCards" class="container mt-4"></div>
+
+            <!-- List items will be dynamically added here -->
             </ul>
 
             <a href="display.html" class="link">Go to Display Page</a>
@@ -523,77 +560,64 @@
 
             <!------------------------------ News JavaScript ------------------------------>
             <script>
-              const inputField = document.getElementById('inputField');
-              const saveButton = document.getElementById('saveButton');
-              const todoList = document.getElementById('todoList');
+              document.addEventListener("DOMContentLoaded", () => {
+                fetch('/api/announcements')
+                  .then(res => res.json())
+                  .then(data => {
+                    const container = document.getElementById('announcementCards');
+                    container.innerHTML = '';
 
-              // Function to load items from localStorage
-              const loadItems = () => {
-                const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
-                todoList.innerHTML = ''; // Clear the list
-                items.forEach((item, index) => {
-                  addTodoItemToDOM(item, index);
-                });
-              };
+                    if (data.length === 0) {
+                      container.innerHTML = "<p>No announcements available.</p>";
+                      return;
+                    }
 
-              // Function to add a new item to the DOM
-              const addTodoItemToDOM = (text, index) => {
-                const li = document.createElement('li');
-                li.className = 'todo-item';
+                    data.forEach(item => {
+                      const card = document.createElement("div");
+                      card.className = "card mb-3";
+                      card.setAttribute("data-id", item.id);
 
-                const span = document.createElement('span');
-                span.textContent = text;
+                      const dateTime = new Date(item.date).toLocaleString();
 
-                const deleteButton = document.createElement('button');
-                deleteButton.className = 'delete-btn';
-                deleteButton.textContent = 'Delete';
-                deleteButton.addEventListener('click', () => {
-                  deleteItem(index);
-                });
+                      card.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">${item.role.toUpperCase()}</h5>
+                        <p class="card-text">${item.message}</p>
+                        <p class="card-text"><small class="text-muted">${dateTime}</small></p>
+                        <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                    </div>
+                `;
 
-                li.appendChild(span);
-                li.appendChild(deleteButton);
-                todoList.appendChild(li);
-              };
+                      container.appendChild(card);
+                    });
 
-              // Function to save a new item
-              const saveItem = () => {
-                const text = inputField.value.trim();
-                if (text) {
-                  const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
-                  items.push(text);
-                  localStorage.setItem('scrollItems', JSON.stringify(items));
-                  addTodoItemToDOM(text, items.length - 1);
-                  inputField.value = '';
-                  updateBanner(); // Update announcement banner
-                } else {
-                  alert('Please enter some text!');
-                }
-              };
+                    // 🔴 Attach delete handlers
+                    document.querySelectorAll('.delete-btn').forEach(btn => {
+                      btn.addEventListener('click', function () {
+                        const card = this.closest('.card');
+                        const id = card.getAttribute('data-id');
 
-              // Function to delete an item
-              const deleteItem = (index) => {
-                const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
-                items.splice(index, 1);
-                localStorage.setItem('scrollItems', JSON.stringify(items));
-                loadItems(); // Reload the list
-                updateBanner(); // Update banner after deletion
-              };
-
-              // Function to update the announcement banner
-              const updateBanner = () => {
-                const bannerContent = document.getElementById('announcementText');
-                const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
-                bannerContent.innerHTML = items.length ? items.map(item => `<p>${item}</p>`).join('') : "<p>No announcements</p>";
-              };
-
-              // Event listener for the "Add" button
-              saveButton.addEventListener('click', saveItem);
-
-              // Load items on page load
-              loadItems();
-              updateBanner(); // Update banner when page loads
+                        fetch(`/api/announcements/${id}`, {
+                          method: 'DELETE'
+                        })
+                          .then(res => {
+                            if (!res.ok) throw new Error("Failed to delete");
+                            return res.json();
+                          })
+                          .then(result => {
+                            alert(result.message);
+                            card.remove(); // ✅ Remove from DOM
+                          })
+                          .catch(err => {
+                            alert("Failed to delete announcement");
+                            console.error("❌ Delete Error:", err);
+                          });
+                      });
+                    });
+                  });
+              });
             </script>
+
 
 
           </div>

@@ -179,8 +179,29 @@ function closeAnnouncement() {
 // Function to update banner content
 function updateBanner() {
     const bannerContent = document.getElementById('announcementText');
-    const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
-    bannerContent.innerHTML = items.length ? items.map(item => `<p>${item}</p>`).join('') : "<p>No announcements</p>";
+
+    fetch("http://localhost:3000/api/announcements")
+        .then(res => res.json())
+        .then(data => {
+            if (data.length) {
+                bannerContent.innerHTML = data.map(item => {
+                    const date = new Date(item.date).toLocaleString();
+                    const role = item.role?.toUpperCase() || "UNKNOWN";
+                    return `
+            <div class="announcement-item">
+              <strong>[${role}]</strong> ${item.message}
+              <span class="timestamp">(${date})</span>
+            </div>
+          `;
+                }).join('');
+            } else {
+                bannerContent.innerHTML = "<p>No announcements</p>";
+            }
+        })
+        .catch(err => {
+            console.error("❌ Error loading announcements:", err);
+            bannerContent.innerHTML = "<p>Error loading announcements</p>";
+        });
 }
 
 // Update banner when clicking outside
