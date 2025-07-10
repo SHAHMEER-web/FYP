@@ -145,7 +145,7 @@
 
                   <div class="col-lg-8">
                     <div id="carouselHUAISociety" class="carousel slide">
-                      <div class="carousel-inner" id="carouselHUAIContentSociety"></div>
+                      <div class="carousel-inner" id="HUAI-section"></div>
                     </div>
                   </div>
                 </div>
@@ -195,7 +195,7 @@
 
                   <div class="col-lg-8">
                     <div id="carouselHUCSSociety" class="carousel slide">
-                      <div class="carousel-inner" id="carouselHUCSContentSociety"></div>
+                      <div class="carousel-inner" id="HUCS-section"></div>
                     </div>
                   </div>
                 </div>
@@ -246,7 +246,7 @@
 
                   <div class="col-lg-8">
                     <div id="carouselHUDSCSociety" class="carousel slide">
-                      <div class="carousel-inner" id="carouselHUDSCContentSociety"></div>
+                      <div class="carousel-inner" id="HUDSC-section"></div>
                     </div>
                   </div>
                 </div>
@@ -259,40 +259,30 @@
   </section>
 
   <script>
-    function loadTimetableImagesSociety(sectionKeySociety, carouselIdSociety) {
-      const carouselContentSociety = document.getElementById(carouselIdSociety);
-      const imagesSociety = JSON.parse(localStorage.getItem(sectionKeySociety)) || [];
+    async function loadSocieties() {
+  const response = await fetch("http://localhost:3000/api/societies");
+  const data = await response.json();
 
-      carouselContentSociety.innerHTML = '';
+  const sections = {
+    HUAI: document.getElementById("HUAI-section"),
+    HUCS: document.getElementById("HUCS-section"),
+    HUDSC: document.getElementById("HUDSC-section")
+  };
 
-      for (let i = 0; i < imagesSociety.length; i += 2) {
-        const carouselItemSociety = document.createElement('div');
-        carouselItemSociety.className = `carousel-item ${i === 0 ? 'active' : ''}`;
+  data.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card m-2 p-2";
+    card.innerHTML = `
+      <img src="data:image/jpeg;base64,${item.image}" class="card-img-top" />
+      <div class="card-body">
+        <p class="card-text">${item.description}</p>
+      </div>
+    `;
+    sections[item.section].appendChild(card);
+  });
+}
 
-        let itemContentSociety = `
-                    <div class="image-pair-society">
-                        <div class="border-changing-society">
-                            <img src="${imagesSociety[i]}" class="d-block img-fluid" alt="Timetable ${i + 1}">
-                        </div>
-                        ${imagesSociety[i + 1] ? `
-                        <div class="border-changing-society">
-                            <img src="${imagesSociety[i + 1]}" class="d-block img-fluid" alt="Timetable ${i + 2}">
-                        </div>
-                        ` : ''}
-                    </div>
-                `;
-
-        carouselItemSociety.innerHTML = itemContentSociety;
-        carouselContentSociety.appendChild(carouselItemSociety);
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      loadTimetableImagesSociety('HUAI', 'carouselHUAIContentSociety');
-      loadTimetableImagesSociety('HUCS', 'carouselHUCSContentSociety');
-      loadTimetableImagesSociety('HUDSC', 'carouselHUDSCContentSociety');
-    });
-
+loadSocieties();
   </script>
 
 

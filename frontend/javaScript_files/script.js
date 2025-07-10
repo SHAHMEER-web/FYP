@@ -3,91 +3,6 @@
 }
 
 
-
-
-// Predefined credentials for HOD, Coordinator, and Super Admin
-const users = {
-    HOD: {
-        id: "12345",
-        password: "hod123"
-    },
-    Coordinator: {
-        id: "67890",
-        password: "coord123"
-    },
-    SuperAdmin: {
-        id: "2278",
-        password: "superadmin"
-    }
-};
-
-// Check if the user is already logged in
-function checkLoginStatus() {
-    const isLoggedIn = sessionStorage.getItem("isLoggedIn");
-    const loginTime = sessionStorage.getItem("loginTime");
-    const currentTime = Date.now();
-
-    // Redirect to login if not logged in or session expired (10 seconds timeout)
-    if (!isLoggedIn || !loginTime || currentTime - loginTime > 10000) {
-        sessionStorage.removeItem("isLoggedIn");
-        sessionStorage.removeItem("loginTime");
-        sessionStorage.removeItem("role");
-        alert("Session expired. Please log in again.");
-        window.location.href = "login.html";
-    }
-}
-
-// Call the function to enforce login check on page load
-if (window.location.pathname.includes("admin.html")) {
-    checkLoginStatus();
-}
-
-// Handle login form submission
-document.addEventListener("DOMContentLoaded", function () {
-    const loginForm = document.getElementById("loginForm");
-
-    if (loginForm) {
-        loginForm.addEventListener("submit", function (event) {
-            event.preventDefault(); // Prevent form submission
-
-            const id = document.getElementById("signin-id").value.trim();
-            const password = document.getElementById("signin-password").value.trim();
-            const errorMessage = document.getElementById("errorMessage");
-
-            // Validate credentials
-            if (
-                (id === users.HOD.id && password === users.HOD.password) ||
-                (id === users.Coordinator.id && password === users.Coordinator.password) ||
-                (id === users.SuperAdmin.id && password === users.SuperAdmin.password)
-            ) {
-                // Store login status and role in sessionStorage
-                let role = "";
-                if (id === users.HOD.id) role = "HOD";
-                if (id === users.Coordinator.id) role = "Coordinator";
-                if (id === users.SuperAdmin.id) role = "SuperAdmin";
-
-                sessionStorage.setItem("isLoggedIn", true);
-                sessionStorage.setItem("role", role);
-
-                // Redirect based on role
-                if (role === "SuperAdmin") {
-                    window.location.href = "Admin panels/super_admin.html";
-                } else {
-                    window.location.href = "Admin panels/admin.html";
-                }
-            } else {
-                // Show error message
-                if (errorMessage) {
-                    errorMessage.textContent = "Invalid ID or Password!";
-                    errorMessage.classList.remove("d-none");
-                } else {
-                    alert("Invalid ID or Password!"); // Fallback error message
-                }
-            }
-        });
-    }
-});
-
 // Reset session if navigating back to login.html after 10 seconds
 if (window.location.pathname.includes("login.html")) {
     const loginTime = sessionStorage.getItem("loginTime");
@@ -146,8 +61,6 @@ document.addEventListener("DOMContentLoaded", displayData);
 
 
 // =============================================== Announcments & News ==================================================
-
-
 
 document.addEventListener("DOMContentLoaded", function () {
     showAnnouncement();
@@ -211,45 +124,6 @@ document.getElementById('announcementOverlay').addEventListener('click', functio
     }
 });
 
-// ================================================== Coordinators Images ================================================
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    const coordinatorsContainer = document.getElementById("coordinatorsContainer");
-
-    function getCoordinators() {
-        return JSON.parse(localStorage.getItem("coordinators")) || [];
-    }
-
-    function renderCoordinators() {
-        coordinatorsContainer.innerHTML = "";
-        const coordinators = getCoordinators();
-
-        coordinators.forEach((coordinator) => {
-            const col = document.createElement("div");
-            col.classList.add("col-lg-4", "col-md-6", "col-sm-12", "d-flex", "justify-content-center", "mb-3");
-
-            col.innerHTML = `
-    <div class="card" style="width: 10rem; border: none; overflow: hidden;">
-        <img src="${coordinator.imageURL}" class="card-img-top img-fluid" style="height: 130px;">
-            <div class="card-body text-center">
-                <h5 class="card-title fw-bold fs-6">${coordinator.name}</h5>
-                <p class="card-text">${coordinator.designation}</p>
-            </div>
-    </div>
-                                  `;
-            coordinatorsContainer.appendChild(col);
-        });
-    }
-
-    renderCoordinators();
-});
-
-fetch('/api/hello')
-    .then(res => res.json())
-    .then(data => console.log(data.message));
-
-
 // Signup
 function signup() {
     const name = document.getElementById('name').value;
@@ -280,7 +154,40 @@ function login() {
         .then(alert);
 }
 
+// Society
 
+document.getElementById("addButtonSociety").addEventListener("click", async () => {
+    const section = document.getElementById("sectionSelectSociety").value;
+    const description = document.getElementById("descriptionSociety").value.trim();
+    const imageFile = document.getElementById("imageInputSociety").files[0];
 
+    if (!section || !description || !imageFile) {
+        alert("All fields are required.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("section", section);
+    formData.append("description", description);
+    formData.append("image", imageFile);
+
+    try {
+        const response = await fetch("http://localhost:3000/api/societies", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert("Image added successfully!");
+            // Optionally refresh the section display
+        } else {
+            alert("Upload failed: " + result.message);
+        }
+    } catch (err) {
+        console.error("Error:", err);
+        alert("Server error. Try again later.");
+    }
+});
 
 

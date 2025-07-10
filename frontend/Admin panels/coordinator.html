@@ -21,61 +21,7 @@
     </div>
     <script>
       // Check if the user is already logged in
-      function checkLoginStatus() {
-        const isLoggedIn = sessionStorage.getItem("isLoggedIn");
-        if (isLoggedIn) {
-          // Redirect to login page if not logged in
-          window.location.href = "../login.html"; // Replace with your login page URL
-        }
-      }
 
-      // Logout function
-      function logout() {
-        sessionStorage.removeItem("isLoggedIn");
-        window.location.href = "../login.html"; // Redirect to login page
-      }
-
-      document.getElementById("deleteMyAccount").addEventListener("click", async () => {
-        const userId = sessionStorage.getItem("userId");
-        if (!userId) {
-          alert("You're not logged in.");
-          return;
-        }
-
-        const confirmDelete = confirm("Are you sure you want to delete your account?");
-        if (!confirmDelete) return;
-        window.location.href = "../login.html";
-        try {
-          const response = await fetch(`/api/delete-user/${userId}`, {
-            method: 'DELETE',
-          });
-
-          const contentType = response.headers.get("content-type");
-          let result;
-
-          if (contentType && contentType.includes("application/json")) {
-            result = await response.json();
-          } else {
-            const text = await response.text();
-            console.error("Non-JSON response:", text);
-            throw new Error("Unexpected server response");
-          }
-
-          if (response.ok) {
-            alert("Your account has been deleted.");
-            sessionStorage.clear();
-            window.location.href = "login.html";
-          } else {
-            alert("Error: " + result.message);
-          }
-        } catch (err) {
-          console.error("Delete failed:", err);
-          alert("Server error. Try again later.");
-        }
-      });
-
-      // Call checkLoginStatus on page load
-      document.addEventListener("DOMContentLoaded", checkLoginStatus);
     </script>
   </header>
 
@@ -123,83 +69,94 @@
               <button id="saveButton">Add</button>
             </div>
 
-            <ul class="todo-list" id="todoList">
-              <!-- List items will be dynamically added here -->
-            </ul>
+            <div id="announcementCards" class="container mt-4"></div>
+
 
             <!------------------ News JavaScript ------------------------>
 
             <script>
-              const inputField = document.getElementById('inputField');
-              const saveButton = document.getElementById('saveButton');
-              const todoList = document.getElementById('todoList');
+              document.addEventListener("DOMContentLoaded", function () {
 
-              // Function to load items from localStorage
-              const loadItems = () => {
-                const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
-                todoList.innerHTML = ''; // Clear the list
-                items.forEach((item, index) => {
-                  addTodoItemToDOM(item, index);
+                const saveButton = document.getElementById("saveButton")
+
+                saveButton.addEventListener("click", async function () {
+                  const message = document.getElementById("inputField").value.trim();
+                  const role = "coordinator"; // or "coordinator" depending on the page
+                  if (!message) return alert("Please enter a message.");
+
+                  const response = await fetch("/api/announcements", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message, role }),
+
+                  })
+                  const result = await response.json();
+                  if (response.ok) {
+                    alert("✅ Announcement added!");
+                    document.getElementById("inputField").value = ""; // clear field
+                    location.reload();
+
+                  } else {
+                    alert("❌ Error: " + result.message);
+                  }
                 });
-              };
+              });
 
-              // Function to add a new item to the DOM
-              const addTodoItemToDOM = (text, index) => {
-                const li = document.createElement('li');
-                li.className = 'todo-item';
+              fetch('/api/announcements')
+                .then(res => res.json())
+                .then(data => {
+                  const container = document.getElementById('announcementCards');
+                  container.innerHTML = '';
 
-                const span = document.createElement('span');
-                span.textContent = text;
+                  if (data.length === 0) {
+                    container.innerHTML = "<p>No announcements available.</p>";
+                    return;
+                  }
 
-                const deleteButton = document.createElement('button');
-                deleteButton.className = 'delete-btn';
-                deleteButton.textContent = 'Delete';
-                deleteButton.addEventListener('click', () => {
-                  deleteItem(index);
+                  data.forEach(item => {
+                    const card = document.createElement("div");
+                    card.className = "card mb-3";
+                    card.setAttribute("data-id", item.id);
+
+                    const dateTime = new Date(item.date).toLocaleString();
+
+                    card.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">${item.role.toUpperCase()}</h5>
+                        <p class="card-text">${item.message}</p>
+                        <p class="card-text"><small class="text-muted">${dateTime}</small></p>
+                        <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                    </div>
+                `;
+
+                    container.appendChild(card);
+                  });
+
+                  // 🔴 Attach delete handlers
+                  document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                      const card = this.closest('.card');
+                      const id = card.getAttribute('data-id');
+
+                      fetch(`/api/announcements/${id}`, {
+                        method: 'DELETE'
+                      })
+                        .then(res => {
+                          if (!res.ok) throw new Error("Failed to delete");
+                          return res.json();
+                        })
+                        .then(result => {
+                          alert(result.message);
+                          card.remove(); // ✅ Remove from DOM
+                        })
+                        .catch(err => {
+                          alert("Failed to delete announcement");
+                          console.error("❌ Delete Error:", err);
+                        });
+                    });
+                  });
                 });
 
-                li.appendChild(span);
-                li.appendChild(deleteButton);
-                todoList.appendChild(li);
-              };
-
-              // Function to save a new item
-              const saveItem = () => {
-                const text = inputField.value.trim();
-                if (text) {
-                  const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
-                  items.push(text);
-                  localStorage.setItem('scrollItems', JSON.stringify(items));
-                  addTodoItemToDOM(text, items.length - 1);
-                  inputField.value = '';
-                  updateBanner(); // Update announcement banner
-                } else {
-                  alert('Please enter some text!');
-                }
-              };
-
-              // Function to delete an item
-              const deleteItem = (index) => {
-                const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
-                items.splice(index, 1);
-                localStorage.setItem('scrollItems', JSON.stringify(items));
-                loadItems(); // Reload the list
-                updateBanner(); // Update banner after deletion
-              };
-
-              // Function to update the announcement banner
-              const updateBanner = () => {
-                const bannerContent = document.getElementById('announcementText');
-                const items = JSON.parse(localStorage.getItem('scrollItems')) || [];
-                bannerContent.innerHTML = items.length ? items.map(item => `<p>${item}</p>`).join('') : "<p>No announcements</p>";
-              };
-
-              // Event listener for the "Add" button
-              saveButton.addEventListener('click', saveItem);
-
-              // Load items on page load
-              loadItems();
-              updateBanner(); // Update banner when page loads
             </script>
 
 
@@ -220,6 +177,13 @@
                 <option value="HUDSC">HUDSC</option>
               </select>
             </div>
+
+            <div class="mb-3">
+              <label for="descriptionSociety" class="form-label">Description:</label>
+              <textarea id="descriptionSociety" class="form-control" rows="3"
+                placeholder="Enter image description..."></textarea>
+            </div>
+
 
             <div class="mb-3">
               <input type="file" id="imageInputSociety" accept="image/*" class="form-control" />
@@ -256,78 +220,6 @@
             <a href="display.html" class="btn btn-link mt-3">Go to Display Page</a>
 
             <script>
-              const sectionSelectSociety = document.getElementById('sectionSelectSociety');
-              const imageInputSociety = document.getElementById('imageInputSociety');
-              const addButtonSociety = document.getElementById('addButtonSociety');
-
-              const HUAIListSociety = document.getElementById('HUAIListSociety');
-              const HUCSListSociety = document.getElementById('HUCSListSociety');
-              const HUDSCListSociety = document.getElementById('HUDSCListSociety');
-
-              const loadImagesSociety = () => {
-                displayImagesSociety("HUAI", HUAIListSociety);
-                displayImagesSociety("HUCS", HUCSListSociety);
-                displayImagesSociety("HUDSC", HUDSCListSociety);
-              };
-
-              const displayImagesSociety = (section, container) => {
-                const imagesSociety = JSON.parse(localStorage.getItem(section)) || [];
-                container.innerHTML = '';
-
-                imagesSociety.forEach((image, index) => {
-                  const imageContainerSociety = document.createElement('div');
-                  imageContainerSociety.className = 'image-container-society d-flex justify-content-between align-items-center';
-
-                  const imgSociety = document.createElement('img');
-                  imgSociety.src = image;
-                  imgSociety.alt = `Image ${index + 1}`;
-
-                  const removeBtnSociety = document.createElement('button');
-                  removeBtnSociety.className = 'remove-btn-society btn-sm';
-                  removeBtnSociety.textContent = 'Remove';
-                  removeBtnSociety.addEventListener('click', () => deleteImageSociety(section, index));
-
-                  imageContainerSociety.appendChild(imgSociety);
-                  imageContainerSociety.appendChild(removeBtnSociety);
-                  container.appendChild(imageContainerSociety);
-                });
-              };
-
-              const addImageSociety = () => {
-                const fileSociety = imageInputSociety.files[0];
-                const selectedSectionSociety = sectionSelectSociety.value;
-
-                if (!selectedSectionSociety) {
-                  alert("Please select a section before uploading an image!");
-                  return;
-                }
-
-                if (!fileSociety) {
-                  alert("Please select an image to upload!");
-                  return;
-                }
-
-                const readerSociety = new FileReader();
-                readerSociety.onload = () => {
-                  const imagesSociety = JSON.parse(localStorage.getItem(selectedSectionSociety)) || [];
-                  imagesSociety.push(readerSociety.result);
-                  localStorage.setItem(selectedSectionSociety, JSON.stringify(imagesSociety));
-                  loadImagesSociety();
-                  imageInputSociety.value = '';
-                  sectionSelectSociety.value = '';
-                };
-                readerSociety.readAsDataURL(fileSociety);
-              };
-
-              const deleteImageSociety = (section, index) => {
-                const imagesSociety = JSON.parse(localStorage.getItem(section)) || [];
-                imagesSociety.splice(index, 1);
-                localStorage.setItem(section, JSON.stringify(imagesSociety));
-                loadImagesSociety();
-              };
-
-              addButtonSociety.addEventListener('click', addImageSociety);
-              document.addEventListener('DOMContentLoaded', loadImagesSociety);
             </script>
           </div>
 
@@ -338,8 +230,8 @@
             <div class="container mt-2">
               <h2 class="text-center">Admin Panel - Add Faculty</h2>
 
-              <form id="facultyForm">
-                <div class="mb-3 mt-4">
+              <form id="facultyForm" enctype="multipart/form-data">
+                <div class="mb-3">
                   <label class="form-label">Select Department</label>
                   <select id="facultySection" class="form-select" required>
                     <option value="CS">Computer Science</option>
@@ -349,19 +241,19 @@
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Name</label>
-                  <input type="text" id="name" class="form-control" required>
+                  <input type="text" id="facultyName" class="form-control" required>
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Designation</label>
-                  <input type="text" id="designation" class="form-control" required>
+                  <input type="text" id="facultyDesignation" class="form-control" required>
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Upload Image</label>
-                  <input type="file" id="image" class="form-control" accept="image/*" required>
+                  <input type="file" id="facultyImage" class="form-control" accept="image/*" required>
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Upload CV (PDF)</label>
-                  <input type="file" id="cv" class="form-control" accept=".pdf" required>
+                  <input type="file" id="facultyCv" class="form-control" accept=".pdf" required>
                 </div>
                 <button type="submit" class="btn btn-success">Add Faculty</button>
               </form>
@@ -370,91 +262,15 @@
 
               <div class="mb-3">
                 <label class="fw-bold">Select Department to View:</label>
-                <select id="adminFacultySection" class="form-select w-50" onchange="loadFaculty()">
+                <select id="adminFacultySection" class="form-select w-50">
                   <option value="CS">Computer Science</option>
                   <option value="AI">Artificial Intelligence</option>
                   <option value="SE">Software Engineering</option>
                 </select>
               </div>
 
-              <ul id="facultyList" class="list-group mt-3"></ul>
+              <div id="facultyList" class="list-group mt-3"></div>
             </div>
-            <!--------------------- Faculty Images JavaScript Code ---------------------------->
-
-            <script>
-              document.addEventListener('DOMContentLoaded', loadFaculty);
-
-              document.getElementById('facultyForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                let section = document.getElementById('facultySection').value;
-                let name = document.getElementById('name').value;
-                let designation = document.getElementById('designation').value;
-                let imageFile = document.getElementById('image').files[0];
-                let cvFile = document.getElementById('cv').files[0];
-
-                if (!imageFile || !cvFile) {
-                  alert('Please upload both an image and a CV.');
-                  return;
-                }
-
-                let reader1 = new FileReader();
-                let reader2 = new FileReader();
-                let imageBase64 = "";
-
-                reader1.onload = function (e) {
-                  imageBase64 = e.target.result;
-                  reader2.readAsDataURL(cvFile);
-                };
-
-                reader2.onload = function (e) {
-                  let cvBase64 = e.target.result;
-
-                  let facultyData = JSON.parse(localStorage.getItem('facultyData')) || { CS: [], AI: [], SE: [] };
-                  let facultyMember = { name, designation, image: imageBase64, cv: cvBase64 };
-
-                  facultyData[section].push(facultyMember);
-                  localStorage.setItem('facultyData', JSON.stringify(facultyData));
-
-                  loadFaculty();
-                  document.getElementById('facultyForm').reset();
-                };
-
-                reader1.readAsDataURL(imageFile);
-              });
-
-              function loadFaculty() {
-                let selectedSection = document.getElementById('adminFacultySection').value;
-                let facultyData = JSON.parse(localStorage.getItem('facultyData')) || { CS: [], AI: [], SE: [] };
-                let facultyList = facultyData[selectedSection] || [];
-
-                let facultyContainer = document.getElementById('facultyList');
-                facultyContainer.innerHTML = "";
-
-                facultyList.forEach((faculty, index) => {
-                  let li = document.createElement('li');
-                  li.className = 'list-group-item d-flex justify-content-between align-items-center';
-
-                  li.innerHTML = `
-                                        <div>
-                                            <img src="${faculty.image}" width="50" height="50" class="rounded-circle me-2">
-                                            <strong>${faculty.name}</strong> - ${faculty.designation}
-                                            <a href="${faculty.cv}" target="_blank" class="btn btn-sm btn-primary">View Profile</a>
-                                        </div>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteFaculty('${selectedSection}', ${index})">Delete</button>
-                                    `;
-
-                  facultyContainer.appendChild(li);
-                });
-              }
-
-              function deleteFaculty(section, index) {
-                let facultyData = JSON.parse(localStorage.getItem('facultyData')) || { CS: [], AI: [], SE: [] };
-                facultyData[section].splice(index, 1);
-                localStorage.setItem('facultyData', JSON.stringify(facultyData));
-                loadFaculty();
-              }
-            </script>
 
           </div>
         </div>

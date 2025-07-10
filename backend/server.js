@@ -12,16 +12,16 @@ const db = new sqlite3.Database('./database.db');
 const PORT = 3000;
 
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }))
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ limit: '20mb', extended: true }))
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ✅ Step 1: Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'ibtihajsaleem426@gmail.com',       // ✅ your Gmail address
-        pass: 'rdor lzzw mfsz vsbl'           // ✅ App password (not Gmail login password)
+        user: 'shahmeerabid134@gmail.com',       // ✅ your Gmail address
+        pass: 'eplj ypnf dacl ynum'          // ✅ App password (not Gmail login password)
     }
 });
 
@@ -79,6 +79,15 @@ db.run(`
   date TEXT NOT NULL
 );`
 );
+
+db.run(`
+    CREATE TABLE IF NOT EXISTS societies (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  section TEXT,
+  image TEXT, -- base64
+  description TEXT
+);`
+);
 // db.run(`
 //     DROP TABLE faculty`)
 
@@ -104,11 +113,15 @@ function generateOTP(role) {
 app.post('/api/register', (req, res) => {
     const { id, firstName, lastName, email, designation, department, image } = req.body;
 
-    const role = designation.toLowerCase();
-    const otp = generateOTP(role); // You must define this function
+    const role = designation?.toLowerCase();
+    const otp = generateOTP(role); // Assuming this function exists
 
-    // ✅ Restriction: Only 1 HOD allowed
+    if (!id || !firstName || !email || !designation || !department || !image) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+
     if (role === 'hod') {
+        // ✅ Restriction: Only 1 HOD allowed
         const hodCheckQuery = `SELECT COUNT(*) AS count FROM users WHERE role = 'hod'`;
         db.get(hodCheckQuery, [], (err, row) => {
             if (err) {
@@ -120,32 +133,35 @@ app.post('/api/register', (req, res) => {
                 return res.status(400).json({ message: "HOD already exists. Only one HOD is allowed." });
             }
 
-            // ✅ Proceed to insert HOD
+            // ✅ Insert HOD
             insertUser();
         });
-    } else {
-        // Not HOD → continue registration
+
+    } else if (role === "coordinator") {
+        // ✅ Insert multiple coordinators allowed
         insertUser();
+
+    } else {
+        return res.status(400).json({ message: "Role not recognized. Allowed: hod or coordinator." });
     }
+
     function insertUser() {
-
-
         const sql = `
-        INSERT INTO users (id, firstName, lastName, email, designation, department, role, image, otp)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (id, firstName, lastName, email, designation, department, role, image, otp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         db.run(sql, [id, firstName, lastName, email, designation, department, role, image, otp], function (err) {
             if (err) {
-                console.error("❌ DB Error:", err.message);
+                console.error("❌ DB Insert Error:", err.message);
                 return res.status(500).json({ message: "Failed to register user." });
             }
 
-            // ✅ HARDCODED EMAIL
-            const adminEmail = "ibtihajsaleem426@gmail.com";
+            // ✅ Send OTP to hardcoded email
+            const adminEmail = "shahmeerabid134@gmail.com";
 
             const mailOptions = {
-                from: 'ibtihajsaleem426@gmail.com',
+                from: 'shahmeerabid134@gmail.com',
                 to: adminEmail,
                 subject: 'New User Registered',
                 text: `New user: ${firstName} ${lastName}\nID: ${id}\nRole: ${role}\nOTP: ${otp}`
@@ -158,11 +174,24 @@ app.post('/api/register', (req, res) => {
                 }
 
                 console.log("✅ Email sent:", info.response);
-                return res.status(200).json({ message: "User registered successfully.", otp }); // optional to return
+                return res.status(200).json({ message: "User registered successfully.", otp });
             });
         });
     }
 });
+
+// Get HOD and Coordinators (department-independent)
+app.get('/api/users/leaders', (req, res) => {
+    const sql = `SELECT * FROM users WHERE role IN ('hod', 'coordinator')`;
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            console.error("❌ Leader Fetch Error:", err.message);
+            return res.status(500).json({ message: "Failed to fetch leaders." });
+        }
+        res.json(rows);
+    });
+});
+
 
 
 
@@ -230,13 +259,6 @@ app.post('/api/faculty', upload.fields([
 
     const { name, designation, department } = req.body;
 
-    // if (!req.files || !req.files.image || !req.files.cv) {
-    //     console.log("❌ Missing files.");
-    //     console.error("❌ Missing files.");
-    //     return res.status(400).json({ message: "Both image and CV are required." });
-    // }
-
-
     const imageBase64 = req.files.image[0].buffer.toString('base64');
     const cvBase64 = req.files.cv[0].buffer.toString('base64');
     // Store as base64
@@ -271,6 +293,23 @@ app.get('/api/faculty', (req, res) => {
     });
 });
 
+app.delete('/api/faculty/:id', (req, res) => {
+    const { id } = req.params;
+
+    const sql = `DELETE FROM faculty WHERE id = ?`;
+    db.run(sql, [id], function (err) {
+        if (err) {
+            console.error("❌ Faculty Delete Error:", err.message);
+            return res.status(500).json({ message: "Failed to delete faculty." });
+        }
+
+        if (this.changes === 0) {
+            return res.status(404).json({ message: "Faculty not found." });
+        }
+
+        return res.json({ message: "Faculty deleted successfully." });
+    });
+});
 
 // Hod Message Route
 
@@ -308,7 +347,7 @@ app.get('/api/hod-messages', (req, res) => {
     });
 });
 
-// Announcement Route
+// Announcement Routes
 app.post('/api/announcements', (req, res) => {
     const { message, role } = req.body;
 
@@ -357,6 +396,35 @@ app.delete('/api/announcements/:id', (req, res) => {
     });
 });
 
+// Society Routes
 
+app.post('/api/societies', upload.single('image'), (req, res) => {
+    const { section, description } = req.body;
+    const imageFile = req.file;
 
+    if (!section || !description || !imageFile) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+
+    const imageBase64 = imageFile.buffer.toString('base64');
+
+    const sql = `INSERT INTO societies (section, image, description) VALUES (?, ?, ?)`;
+    db.run(sql, [section, imageBase64, description], function (err) {
+        if (err) {
+            console.error("❌ Insert Error:", err.message);
+            return res.status(500).json({ message: "Database error." });
+        }
+        res.status(200).json({ message: "Image added successfully!" });
+    });
+});
+
+app.get('/api/societies', (req, res) => {
+    db.all("SELECT * FROM societies", [], (err, rows) => {
+        if (err) {
+            console.error("❌ Fetch Error:", err.message);
+            return res.status(500).json({ message: "Failed to fetch data." });
+        }
+        res.json(rows);
+    });
+});
 

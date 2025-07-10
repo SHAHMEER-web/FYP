@@ -443,97 +443,6 @@
               <div id="facultyList" class="list-group mt-3"></div>
             </div>
 
-            <script>
-
-
-              document.addEventListener("DOMContentLoaded", function () {
-                // form submit listener here
-                document.getElementById("facultyForm").addEventListener("submit", async function (e) {
-                  e.preventDefault();
-
-                  const name = document.getElementById("facultyName").value;
-                  const designation = document.getElementById("facultyDesignation").value;
-                  const department = document.getElementById("facultySection").value;
-                  const imageFile = document.getElementById("facultyImage").files[0];
-                  const cvFile = document.getElementById("facultyCv").files[0];
-
-                  if (!imageFile || !cvFile) {
-                    alert("Please upload both image and CV.");
-                    return;
-                  }
-                  const formData = new FormData();
-                  formData.append("name", name);
-                  formData.append("department", department);
-                  formData.append("designation", designation);
-                  formData.append("image", imageFile);
-                  formData.append("cv", cvFile);
-
-
-                  try {
-                    const response = await fetch("http://localhost:3000/api/faculty", {
-                      method: "POST",
-                      body: formData
-                    });
-
-                    const result = await response.json();
-                    if (response.ok) {
-                      alert("Faculty added successfully!");
-                    } else {
-                      alert("Upload failed: " + result.message);
-                    }
-                  } catch (err) {
-                    console.error("Error:", err);
-                    alert("Server error. Try again later.");
-                  }
-                });
-              });
-
-              async function loadFaculty() {
-                const department = document.getElementById("adminFacultySection").value;
-                const container = document.getElementById("facultyList");
-                container.innerHTML = ""; // Clear current faculty
-
-                try {
-                  const res = await fetch(`http://localhost:3000/api/faculty?department=${department}`);
-                  const data = await res.json();
-
-                  if (!data.length) {
-                    container.innerHTML = "<p>No faculty found for this department.</p>";
-                    return;
-                  }
-
-                  data.forEach(faculty => {
-                    const card = document.createElement("div");
-                    card.className = "col-md-4 mb-3";
-                    card.innerHTML = `
-          <div class="card h-100 shadow-sm">
-            ${faculty.image ? `<img src="data:image/png;base64,${faculty.image}" class="card-img-top" style="height:200px; object-fit:cover;">` : ''}
-            <div class="card-body">
-              <h5 class="card-title">${faculty.name}</h5>
-              <p class="card-text"><strong>${faculty.designation}</strong><br>${faculty.department}</p>
-              ${faculty.cv ? `<a href="data:application/pdf;base64,${faculty.cv}" download="${faculty.name}-CV.pdf" class="btn btn-outline-primary btn-sm">Download CV</a>` : ''}
-            </div>
-          </div>
-        `;
-                    container.appendChild(card);
-                  });
-
-                } catch (err) {
-                  console.error("❌ Error loading faculty:", err);
-                  container.innerHTML = "<p>Failed to load faculty.</p>";
-                }
-              }
-
-              // 🔁 Load faculty when dropdown changes
-              document.getElementById("adminFacultySection").addEventListener("change", loadFaculty);
-
-              // 🔁 Load default on page load
-              document.addEventListener("DOMContentLoaded", loadFaculty);
-
-
-
-            </script>
-
 
           </div>
 
@@ -550,36 +459,63 @@
               <button id="saveButton">Add</button>
             </div>
 
+
             <div id="announcementCards" class="container mt-4"></div>
 
             <!-- List items will be dynamically added here -->
-            </ul>
 
             <a href="display.html" class="link">Go to Display Page</a>
 
 
             <!------------------------------ News JavaScript ------------------------------>
             <script>
-              document.addEventListener("DOMContentLoaded", () => {
-                fetch('/api/announcements')
-                  .then(res => res.json())
-                  .then(data => {
-                    const container = document.getElementById('announcementCards');
-                    container.innerHTML = '';
 
-                    if (data.length === 0) {
-                      container.innerHTML = "<p>No announcements available.</p>";
-                      return;
-                    }
+              document.addEventListener("DOMContentLoaded", function () {
 
-                    data.forEach(item => {
-                      const card = document.createElement("div");
-                      card.className = "card mb-3";
-                      card.setAttribute("data-id", item.id);
+                const saveButton = document.getElementById("saveButton")
 
-                      const dateTime = new Date(item.date).toLocaleString();
+                saveButton.addEventListener("click", async function () {
+                  const message = document.getElementById("inputField").value.trim();
+                  const role = "hod"; // or "coordinator" depending on the page
+                  if (!message) return alert("Please enter a message.");
 
-                      card.innerHTML = `
+                  const response = await fetch("/api/announcements", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message, role }),
+
+                  })
+                  const result = await response.json();
+                  if (response.ok) {
+                    alert("✅ Announcement added!");
+                    document.getElementById("inputField").value = ""; // clear field
+                    location.reload();
+
+                  } else {
+                    alert("❌ Error: " + result.message);
+                  }
+                });
+              });
+
+              fetch('/api/announcements')
+                .then(res => res.json())
+                .then(data => {
+                  const container = document.getElementById('announcementCards');
+                  container.innerHTML = '';
+
+                  if (data.length === 0) {
+                    container.innerHTML = "<p>No announcements available.</p>";
+                    return;
+                  }
+
+                  data.forEach(item => {
+                    const card = document.createElement("div");
+                    card.className = "card mb-3";
+                    card.setAttribute("data-id", item.id);
+
+                    const dateTime = new Date(item.date).toLocaleString();
+
+                    card.innerHTML = `
                     <div class="card-body">
                         <h5 class="card-title">${item.role.toUpperCase()}</h5>
                         <p class="card-text">${item.message}</p>
@@ -588,34 +524,33 @@
                     </div>
                 `;
 
-                      container.appendChild(card);
-                    });
+                    container.appendChild(card);
+                  });
 
-                    // 🔴 Attach delete handlers
-                    document.querySelectorAll('.delete-btn').forEach(btn => {
-                      btn.addEventListener('click', function () {
-                        const card = this.closest('.card');
-                        const id = card.getAttribute('data-id');
+                  // 🔴 Attach delete handlers
+                  document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                      const card = this.closest('.card');
+                      const id = card.getAttribute('data-id');
 
-                        fetch(`/api/announcements/${id}`, {
-                          method: 'DELETE'
+                      fetch(`/api/announcements/${id}`, {
+                        method: 'DELETE'
+                      })
+                        .then(res => {
+                          if (!res.ok) throw new Error("Failed to delete");
+                          return res.json();
                         })
-                          .then(res => {
-                            if (!res.ok) throw new Error("Failed to delete");
-                            return res.json();
-                          })
-                          .then(result => {
-                            alert(result.message);
-                            card.remove(); // ✅ Remove from DOM
-                          })
-                          .catch(err => {
-                            alert("Failed to delete announcement");
-                            console.error("❌ Delete Error:", err);
-                          });
-                      });
+                        .then(result => {
+                          alert(result.message);
+                          card.remove(); // ✅ Remove from DOM
+                        })
+                        .catch(err => {
+                          alert("Failed to delete announcement");
+                          console.error("❌ Delete Error:", err);
+                        });
                     });
                   });
-              });
+                });
             </script>
 
 
@@ -638,6 +573,13 @@
                   <option value="HUDSC">HUDSC</option>
                 </select>
               </div>
+
+              <div class="mb-3">
+                <label for="descriptionSociety" class="form-label">Description:</label>
+                <textarea id="descriptionSociety" class="form-control" rows="3"
+                  placeholder="Enter image description..."></textarea>
+              </div>
+
 
               <div class="mb-3">
                 <input type="file" id="imageInputSociety" accept="image/*" class="form-control" />
