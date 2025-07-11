@@ -135,22 +135,25 @@
             <div class="col-12">
               <div class="container mt-5">
                 <h3>Add HOD's Message</h3>
-                <form id="adminDataForm">
+                <form id="adminDataForm" enctype="multipart/form-data">
                   <div class="mb-3">
                     <label for="title" class="form-label">Title:</label>
-                    <input type="text" id="title" class="form-control" placeholder="Enter title" required />
+                    <input type="text" id="title" name="title" class="form-control" placeholder="Enter title"
+                      required />
                   </div>
                   <div class="mb-3">
                     <label for="description" class="form-label">Description:</label>
-                    <textarea id="description" class="form-control" placeholder="Enter description" required></textarea>
+                    <textarea id="description" name="description" class="form-control" placeholder="Enter description"
+                      required></textarea>
                   </div>
                   <div class="mb-3">
                     <label for="author" class="form-label">Author:</label>
-                    <input type="text" id="author" class="form-control" placeholder="Enter author name" required />
+                    <input type="text" id="author" name="author" class="form-control" placeholder="Enter author name"
+                      required />
                   </div>
                   <div class="mb-3">
                     <label for="image" class="form-label">Upload Image:</label>
-                    <input type="file" id="image" class="form-control" accept="image/*" required />
+                    <input type="file" id="image" name="image" class="form-control" accept="image/*" required />
                   </div>
 
                   <button type="submit" class="btn btn-primary">Add Data</button>
@@ -194,8 +197,7 @@
                   e.preventDefault();
 
                   const form = e.target;
-                  const formData = new FormData();
-
+                  const formData = new FormData(form);
 
                   try {
                     const response = await fetch("http://localhost:3000/api/hod-message", {
