@@ -22,7 +22,7 @@ function loadLeaders() {
 
 function createLeaderCard(user, label) {
     return `
-<div class="col-md-4 d-flex justify-content-center mb-4">
+    <div class="col-md-4 d-flex justify-content-center mb-4">
       <div class="card text-center shadow-sm" style="width: 18rem;">
         <img src="${user.image}" class="card-img-top rounded-circle mx-auto mt-3" style="width: 120px; height: 120px; object-fit: cover;" alt="${user.firstName}">
         <div class="card-body">
@@ -47,6 +47,9 @@ function loadHodMessages() {
             messages.forEach((msg, index) => {
                 const activeClass = index === 0 ? 'active' : '';
                 inner.innerHTML += `
+                <div class="coor-heading">
+                  <h2 class="text-center">HOD Message</h2>
+                </div>
                 <div class="carousel-item ${activeClass}">
                     <div class="card mx-auto text-center" style="max-width: 500px;">
                     <div class="d-flex justify-content-center">

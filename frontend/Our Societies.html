@@ -260,34 +260,33 @@
 
   <script>
     async function loadSocieties() {
-  const response = await fetch("http://localhost:3000/api/societies");
-  const data = await response.json();
+      const response = await fetch("http://localhost:3000/api/societies");
+      const data = await response.json();
 
-  const sections = {
-    HUAI: document.getElementById("HUAI-section"),
-    HUCS: document.getElementById("HUCS-section"),
-    HUDSC: document.getElementById("HUDSC-section")
-  };
+      const sections = {
+        HUAI: document.getElementById("HUAI-section"),
+        HUCS: document.getElementById("HUCS-section"),
+        HUDSC: document.getElementById("HUDSC-section")
+      };
 
-  data.forEach(item => {
-    const card = document.createElement("div");
-    card.className = "card m-2 p-2";
-    card.innerHTML = `
-      <img src="data:image/jpeg;base64,${item.image}" class="card-img-top" />
+      data.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "card m-2 p-2";
+        card.innerHTML = `
+                     <img src="data:image/jpeg;base64,${item.image}" class="card-img-top" />
       <div class="card-body">
         <p class="card-text">${item.description}</p>
-      </div>
-    `;
-    sections[item.section].appendChild(card);
-  });
-}
+      </div>`;
+        sections[item.section].appendChild(card);
+      });
+    }
 
-loadSocieties();
+    loadSocieties();
   </script>
 
 
   <!-- Chatbot Icon -->
- 
+
 
   <!-- footer -->
   <section class="hero-footer mt-5">
@@ -392,7 +391,7 @@ loadSocieties();
   </section>
 
 
-  
+
 
 </body>
 <script src="./javaScript_files/script.js"></script>

@@ -107,9 +107,6 @@
             <button class="nav-link active text-start" id="v-pills-home-tab" data-bs-toggle="pill"
               data-bs-target="#v-pills-home" type="button" role="tab" aria-controls="v-pills-home"
               aria-selected="true">Home</button>
-            <button class="nav-link text-start" id="v-pills-profile-tab" data-bs-toggle="pill"
-              data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile"
-              aria-selected="false">Coordinators Images</button>
             <button class="nav-link text-start" id="v-pills-timetable-tab" data-bs-toggle="pill"
               data-bs-target="#v-pills-timetable" type="button" role="tab" aria-controls="v-pills-timetable"
               aria-selected="false">Add Faculty Members</button>
@@ -161,241 +158,9 @@
 
                 <div id="dynamicContent" class="mt-5"></div>
               </div>
-
-              <!--------------------- HOD Message JavaScript Code ---------------------------->
-
-              <script>
-                async function loadHodMessages() {
-                  try {
-                    const response = await fetch("http://localhost:3000/api/hod-messages");
-                    const messages = await response.json();
-
-                    const container = document.getElementById("dynamicContent");
-                    container.innerHTML = ""; // Clear previous content
-
-                    messages.forEach(msg => {
-                      const card = document.createElement("div");
-                      card.className = "card mb-3 p-3 shadow-sm";
-
-                      card.innerHTML = `
-          <h4>${msg.title}</h4>
-          <p>${msg.description}</p>
-          <p><strong>- ${msg.author}</strong></p>
-          ${msg.image ? `<img src="data:image/png;base64,${msg.image}" style="max-width: 200px;" class="img-fluid rounded">` : ''}
-        `;
-
-                      container.appendChild(card);
-                    });
-                  } catch (err) {
-                    console.error("❌ Failed to load messages:", err);
-                  }
-                }
-                // DOM Elements
-                document.addEventListener("DOMContentLoaded", loadHodMessages);
-
-                document.getElementById("adminDataForm").addEventListener("submit", async function (e) {
-                  e.preventDefault();
-
-                  const form = e.target;
-                  const formData = new FormData(form);
-
-                  try {
-                    const response = await fetch("http://localhost:3000/api/hod-message", {
-                      method: "POST",
-                      body: formData
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok) {
-                      alert("Message added successfully!");
-                      form.reset();
-                    } else {
-                      alert("Upload failed: " + result.message);
-                    }
-                  } catch (err) {
-                    console.error("❌ Error:", err);
-                    alert("Server error. Try again later.");
-                  }
-                });
-
-                fetch("http://localhost:3000/api/hod-messages")
-                  .then(res => res.json())
-                  .then(data => {
-                    const container = document.getElementById("dynamicContent");
-                    data.forEach(item => {
-                      const div = document.createElement("div");
-                      div.innerHTML = `
-        <h4>${item.title}</h4>
-        <p>${item.description}</p>
-        <p><strong>- ${item.author}</strong></p>
-        <img src="data:image/png;base64,${item.image}" style="max-width: 200px;">
-        <hr>
-      `;
-                      container.appendChild(div);
-                    });
-                  });
-
-              </script>
-
+              <div id="hodMessagesContainer"></div>
             </div>
           </div>
-
-
-          <!--==================================== Add Coordinators Images ============================================-->
-
-          <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab"
-            tabindex="0">
-            <div class="container mt-5 coordinator">
-              <h2 class="text-center">Manage Coordinators</h2>
-
-              <form id="coordinatorForm" class="mb-4">
-                <div class="mb-2">
-                  <input type="text" id="name" class="form-control" placeholder="Name" required>
-                </div>
-                <div class="mb-2">
-                  <input type="text" id="designation" class="form-control" placeholder="Designation" required>
-                </div>
-                <div class="mb-2">
-                  <input type="file" id="imageUpload" class="form-control" name="image" accept="image/*" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Add Coordinator</button>
-              </form>
-
-              <h4>Coordinators List</h4>
-              <div id="coordinatorsList" class="row"></div>
-            </div>
-
-            <!--------------------- Coordinators Images JavaScript Code ---------------------------->
-
-            <script>
-              document.addEventListener("DOMContentLoaded", function () {
-                const form = document.getElementById("coordinatorForm");
-                const imageUpload = document.getElementById("imageUpload");
-                const coordinatorsList = document.getElementById("coordinatorsList");
-
-                function getCoordinators() {
-                  return JSON.parse(localStorage.getItem("coordinators")) || [];
-                }
-
-                function saveCoordinators(coordinators) {
-                  localStorage.setItem("coordinators", JSON.stringify(coordinators));
-                }
-
-                function renderCoordinators() {
-                  coordinatorsList.innerHTML = "";
-                  const coordinators = getCoordinators();
-
-                  coordinators.forEach((coordinator, index) => {
-                    const card = document.createElement("div");
-                    card.classList.add("col-md-4", "mb-3");
-                    card.innerHTML = `
-                        <div class="card text-center p-2">
-                            <img src="${coordinator.imageURL}" class="card-img-top mx-auto img-fluid" style="width: 80px; height: 80px; object-fit: cover;">
-                            <div class="card-body">
-                                <h5 class="card-title">${coordinator.name}</h5>
-                                <p class="card-text">${coordinator.designation}</p>
-                                <button class="btn btn-danger btn-sm" onclick="deleteCoordinator(${index})">Delete</button>
-                            </div>
-                        </div>
-                    `;
-                    coordinatorsList.appendChild(card);
-                  });
-                }
-
-                document.addEventListener("DOMContentLoaded", function () {
-                  const form = document.getElementById("coordinatorForm");
-                  const imageUpload = document.getElementById("imageUpload");
-                  const coordinatorsList = document.getElementById("coordinatorsList");
-
-                  // ✅ Load and render coordinators from backend
-                  async function loadCoordinators() {
-                    coordinatorsList.innerHTML = '';
-                    try {
-                      const response = await fetch('/api/coordinator');
-                      const coordinators = await response.json();
-
-                      coordinators.forEach(coordinator => {
-                        const card = document.createElement("div");
-                        card.classList.add("col-md-4", "mb-3");
-                        card.innerHTML = `
-            <div class="card text-center p-2">
-              <img src="default-avatar.png" class="card-img-top mx-auto img-fluid" style="width: 80px; height: 80px; object-fit: cover;">
-              <div class="card-body">
-                <h5 class="card-title">${coordinator.name}</h5>
-                <p class="card-text">${coordinator.designation}</p>
-              </div>
-            </div>
-          `;
-                        coordinatorsList.appendChild(card);
-                      });
-
-                      if (coordinators.length === 0) {
-                        coordinatorsList.innerHTML = "<p>No coordinators found.</p>";
-                      }
-
-                    } catch (error) {
-                      console.error("Failed to fetch coordinators:", error);
-                      coordinatorsList.innerHTML = "<p>Error loading coordinators.</p>";
-                    }
-                  }
-
-                  // ✅ Submit form to backend
-                  form.addEventListener("submit", async function (e) {
-                    e.preventDefault();
-
-                    const name = document.getElementById("name").value;
-                    const designation = document.getElementById("designation").value;
-                    const file = imageUpload.files[0];
-
-                    if (!name || !designation || !file) {
-                      alert("All fields are required.");
-                      return;
-                    }
-
-                    const formData = new FormData();
-                    formData.append("name", name);
-                    formData.append("designation", designation);
-                    formData.append("image", file);
-
-                    try {
-                      const response = await fetch('/api/coordinator', {
-                        method: 'POST',
-                        body: formData
-                      });
-
-                      const result = await response.json();
-
-                      if (response.ok) {
-                        alert("Coordinator added successfully!");
-                        form.reset();
-                        loadCoordinators(); // 🔁 refresh list
-                      } else {
-                        alert("Error: " + result.message);
-                      }
-                    } catch (error) {
-                      console.error(error);
-                      alert("Server error");
-                    }
-                  });
-
-                  // 🚀 Load coordinators when page loads
-                  loadCoordinators();
-                });
-
-                window.deleteCoordinator = function (index) {
-                  const coordinators = getCoordinators();
-                  coordinators.splice(index, 1);
-                  saveCoordinators(coordinators);
-                  renderCoordinators();
-                };
-
-                renderCoordinators();
-              });
-            </script>
-
-          </div>
-
           <!--===================================== Departments Faculty uploading ==================================== -->
 
           <div class="tab-pane fade" id="v-pills-timetable" role="tabpanel" aria-labelledby="v-pills-timetable-tab"
@@ -472,87 +237,7 @@
             <!------------------------------ News JavaScript ------------------------------>
             <script>
 
-              document.addEventListener("DOMContentLoaded", function () {
 
-                const saveButton = document.getElementById("saveButton")
-
-                saveButton.addEventListener("click", async function () {
-                  const message = document.getElementById("inputField").value.trim();
-                  const role = "hod"; // or "coordinator" depending on the page
-                  if (!message) return alert("Please enter a message.");
-
-                  const response = await fetch("/api/announcements", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message, role }),
-
-                  })
-                  const result = await response.json();
-                  if (response.ok) {
-                    alert("✅ Announcement added!");
-                    document.getElementById("inputField").value = ""; // clear field
-                    location.reload();
-
-                  } else {
-                    alert("❌ Error: " + result.message);
-                  }
-                });
-              });
-
-              fetch('/api/announcements')
-                .then(res => res.json())
-                .then(data => {
-                  const container = document.getElementById('announcementCards');
-                  container.innerHTML = '';
-
-                  if (data.length === 0) {
-                    container.innerHTML = "<p>No announcements available.</p>";
-                    return;
-                  }
-
-                  data.forEach(item => {
-                    const card = document.createElement("div");
-                    card.className = "card mb-3";
-                    card.setAttribute("data-id", item.id);
-
-                    const dateTime = new Date(item.date).toLocaleString();
-
-                    card.innerHTML = `
-                    <div class="card-body">
-                        <h5 class="card-title">${item.role.toUpperCase()}</h5>
-                        <p class="card-text">${item.message}</p>
-                        <p class="card-text"><small class="text-muted">${dateTime}</small></p>
-                        <button class="btn btn-danger btn-sm delete-btn">Delete</button>
-                    </div>
-                `;
-
-                    container.appendChild(card);
-                  });
-
-                  // 🔴 Attach delete handlers
-                  document.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', function () {
-                      const card = this.closest('.card');
-                      const id = card.getAttribute('data-id');
-
-                      fetch(`/api/announcements/${id}`, {
-                        method: 'DELETE'
-                      })
-                        .then(res => {
-                          if (!res.ok) throw new Error("Failed to delete");
-                          return res.json();
-                        })
-                        .then(result => {
-                          alert(result.message);
-                          card.remove(); // ✅ Remove from DOM
-                        })
-                        .catch(err => {
-                          alert("Failed to delete announcement");
-                          console.error("❌ Delete Error:", err);
-                        });
-                    });
-                  });
-                });
             </script>
 
 
@@ -592,106 +277,24 @@
               <h2 class="mt-5">Uploaded Images</h2>
 
               <!-- Bootstrap Grid: 3 Columns for 3 Sections -->
-              <div class="row mt-4">
-                <div class="col-md-4">
-                  <div class="section-box-society">
-                    <h3 class="text-center">HUAI</h3>
-                    <div class="image-gallery-society" id="HUAIListSociety"></div>
-                  </div>
+              <div class="mt-5">
+                <h4>View Societies by Section</h4>
+                <div class="btn-group mb-4" role="group">
+                  <button class="btn btn-outline-primary" onclick="filterSocieties('HUAI')">HUAI</button>
+                  <button class="btn btn-outline-success" onclick="filterSocieties('HUCS')">HUCS</button>
+                  <button class="btn btn-outline-danger" onclick="filterSocieties('HUDSC')">HUDSC</button>
                 </div>
-
-                <div class="col-md-4">
-                  <div class="section-box-society">
-                    <h3 class="text-center">HUCS</h3>
-                    <div class="image-gallery-society" id="HUCSListSociety"></div>
-                  </div>
-                </div>
-
-                <div class="col-md-4">
-                  <div class="section-box-society">
-                    <h3 class="text-center">HUDSC</h3>
-                    <div class="image-gallery-society" id="HUDSCListSociety"></div>
-                  </div>
+                <div class="container">
+                  <div class="row" id="societyImageContainer"></div>
                 </div>
               </div>
             </div>
 
+
+
             <!--------------------- Societies Images JavaScript Code ---------------------------->
 
-            <script>
-              const sectionSelectSociety = document.getElementById('sectionSelectSociety');
-              const imageInputSociety = document.getElementById('imageInputSociety');
-              const addButtonSociety = document.getElementById('addButtonSociety');
 
-              const HUAIListSociety = document.getElementById('HUAIListSociety');
-              const HUCSListSociety = document.getElementById('HUCSListSociety');
-              const HUDSCListSociety = document.getElementById('HUDSCListSociety');
-
-              const loadImagesSociety = () => {
-                displayImagesSociety("HUAI", HUAIListSociety);
-                displayImagesSociety("HUCS", HUCSListSociety);
-                displayImagesSociety("HUDSC", HUDSCListSociety);
-              };
-
-              const displayImagesSociety = (section, container) => {
-                const imagesSociety = JSON.parse(localStorage.getItem(section)) || [];
-                container.innerHTML = '';
-
-                imagesSociety.forEach((image, index) => {
-                  const imageContainerSociety = document.createElement('div');
-                  imageContainerSociety.className = 'image-container-society d-flex justify-content-between align-items-center';
-
-                  const imgSociety = document.createElement('img');
-                  imgSociety.src = image;
-                  imgSociety.alt = `Image ${index + 1}`;
-
-                  const removeBtnSociety = document.createElement('button');
-                  removeBtnSociety.className = 'remove-btn-society btn-sm';
-                  removeBtnSociety.textContent = 'Remove';
-                  removeBtnSociety.addEventListener('click', () => deleteImageSociety(section, index));
-
-                  imageContainerSociety.appendChild(imgSociety);
-                  imageContainerSociety.appendChild(removeBtnSociety);
-                  container.appendChild(imageContainerSociety);
-                });
-              };
-
-              const addImageSociety = () => {
-                const fileSociety = imageInputSociety.files[0];
-                const selectedSectionSociety = sectionSelectSociety.value;
-
-                if (!selectedSectionSociety) {
-                  alert("Please select a section before uploading an image!");
-                  return;
-                }
-
-                if (!fileSociety) {
-                  alert("Please select an image to upload!");
-                  return;
-                }
-
-                const readerSociety = new FileReader();
-                readerSociety.onload = () => {
-                  const imagesSociety = JSON.parse(localStorage.getItem(selectedSectionSociety)) || [];
-                  imagesSociety.push(readerSociety.result);
-                  localStorage.setItem(selectedSectionSociety, JSON.stringify(imagesSociety));
-                  loadImagesSociety();
-                  imageInputSociety.value = '';
-                  sectionSelectSociety.value = '';
-                };
-                readerSociety.readAsDataURL(fileSociety);
-              };
-
-              const deleteImageSociety = (section, index) => {
-                const imagesSociety = JSON.parse(localStorage.getItem(section)) || [];
-                imagesSociety.splice(index, 1);
-                localStorage.setItem(section, JSON.stringify(imagesSociety));
-                loadImagesSociety();
-              };
-
-              addButtonSociety.addEventListener('click', addImageSociety);
-              document.addEventListener('DOMContentLoaded', loadImagesSociety);
-            </script>
           </div>
         </div>
       </div>

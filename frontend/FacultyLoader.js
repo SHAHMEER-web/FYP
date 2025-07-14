@@ -44,7 +44,7 @@ function createLeaderCard(user) {
     const img = user.image
 
     return `
-    <div class=" row justify-center col-md-4 mb-3">
+    <div class=" d-flex justify-content-center col-md-4 mb-4">
         <div class="card h-100 shadow-sm">
             <div class="card-body d-flex align-items-center">
                 <img src="${img}" class="me-3 rounded-circle" width="100" height="100">
