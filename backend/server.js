@@ -109,7 +109,6 @@ function generateOTP(role) {
 }
 
 // api/register
-
 app.post('/api/register', (req, res) => {
     const { id, firstName, lastName, email, designation, department, image } = req.body;
 
@@ -339,13 +338,47 @@ app.post('/api/hod-message', upload.single('image'), (req, res) => {
 });
 
 app.get('/api/hod-messages', (req, res) => {
-    db.all("SELECT * FROM hod_messages", [], (err, rows) => {
+    const sql = `SELECT * FROM hod_messages ORDER BY id DESC`;
+
+    db.all(sql, [], (err, rows) => {
         if (err) {
-            return res.status(500).json({ message: "Database error" });
+            console.error("❌ DB Error:", err.message);
+            return res.status(500).json({ message: "Database error." });
         }
-        res.json(rows);
+
+        // Convert base64 image and add role
+        const messages = rows.map(row => ({
+            ...row,
+            image: `data:image/jpeg;base64,${row.image}`,
+            role: "Head of Department"
+        }));
+
+        res.json(messages);
     });
 });
+
+// Delete a HOD message by ID
+app.delete('/api/hod-message/:id', (req, res) => {
+    const { id } = req.params;
+
+    const sql = `DELETE FROM hod_messages WHERE id = ?`;
+
+    db.run(sql, [id], function (err) {
+        if (err) {
+            console.error("❌ Delete HOD Message Error:", err.message);
+            return res.status(500).json({ message: "Failed to delete message." });
+        }
+
+        if (this.changes === 0) {
+            return res.status(404).json({ message: "Message not found." });
+        }
+
+        res.status(200).json({ message: "Message deleted successfully." });
+    });
+});
+
+
+
 
 // Announcement Routes
 app.post('/api/announcements', (req, res) => {
@@ -425,6 +458,20 @@ app.get('/api/societies', (req, res) => {
             return res.status(500).json({ message: "Failed to fetch data." });
         }
         res.json(rows);
+    });
+});
+
+app.delete('/api/societies/:id', (req, res) => {
+    const id = req.params.id;
+
+    const sql = `DELETE FROM societies WHERE id = ?`;
+    db.run(sql, [id], function (err) {
+        if (err) {
+            console.error("❌ Society Delete Error:", err.message);
+            return res.status(500).json({ message: "Failed to delete image." });
+        }
+
+        res.status(200).json({ message: "Image deleted successfully." });
     });
 });
 
